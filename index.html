@@ -2109,8 +2109,9 @@
         // Firebase 실시간 리스너 설정
         function setupFirebaseListeners() {
             database.ref('students').on('value', (snapshot) => {
-                const savedData = snapshot.val();
+                let savedData = snapshot.val();
                 if (savedData && Array.isArray(savedData) && savedData.length > 0) {
+                    savedData.forEach(s => { if (!Array.isArray(s.subjects)) s.subjects = []; });
                     if (JSON.stringify(students) !== JSON.stringify(savedData)) {
                         students.length = 0;
                         students.push(...savedData);
@@ -2772,6 +2773,7 @@
             let grade2Index = 1;
 
             sortedStudents.forEach(student => {
+                if (!Array.isArray(student.subjects)) student.subjects = [];
                 const isChecked = (checkedStudents[currentWeek] && checkedStudents[currentWeek][student.id]) || {};
 
                 if (student.grade === 1) {
@@ -3701,6 +3703,7 @@
         }
 
         function createTab2Row(student, rowIndex) {
+            if (!Array.isArray(student.subjects)) student.subjects = [];
             const tr = document.createElement('tr');
             tr.dataset.deliveryType = student.deliveryType || '';
 
@@ -3888,6 +3891,7 @@
         }
 
         function createTab5Row(student, rowIndex, isDelivery) {
+            if (!Array.isArray(student.subjects)) student.subjects = [];
             const tr = document.createElement('tr');
 
             const subjectsHtml = student.subjects.map(subj =>
@@ -3983,6 +3987,7 @@
         }
 
         function createTab3Row(student, rowIndex) {
+            if (!Array.isArray(student.subjects)) student.subjects = [];
             const tr = document.createElement('tr');
             if (editModeTab3) tr.classList.add('edit-mode-active');
             tr.dataset.studentId = student.id;

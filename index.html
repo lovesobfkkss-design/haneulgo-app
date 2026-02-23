@@ -2442,6 +2442,10 @@
                     s.paymentStatus = '';
                     changed = true;
                 }
+                if (!Array.isArray(s.subjects)) {
+                    s.subjects = [];
+                    changed = true;
+                }
                 if (s.deliveryType === undefined) {
                     s.deliveryType = '';
                     changed = true;
@@ -2787,6 +2791,7 @@
         }
 
         function createStudentRow(student, isChecked, rowIndex) {
+            if (!student.subjects) student.subjects = [];
             const tr = document.createElement('tr');
             tr.dataset.deliveryType = student.deliveryType || '';
 

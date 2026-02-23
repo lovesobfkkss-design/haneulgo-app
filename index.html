@@ -2117,7 +2117,8 @@
                         students.push(...savedData);
                         const fieldsChanged = ensureNewFields();
                         const changed = ensureStudentIds();
-                        if (fieldsChanged || changed) saveStudentsData();
+                        const deduped = removeDuplicateStudents();
+                        if (fieldsChanged || changed || deduped) saveStudentsData();
                         renderStudents();
                         if (currentTab === 2) renderTab2();
                         if (currentTab === 3) renderTab3();
@@ -2671,6 +2672,26 @@
                 idSet.add(s.id);
             });
             return changed;
+        }
+
+        function removeDuplicateStudents() {
+            const seen = new Set();
+            const before = students.length;
+            const unique = [];
+            students.forEach(s => {
+                const key = `${s.name}_${s.grade}_${s.class}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    unique.push(s);
+                }
+            });
+            if (unique.length < before) {
+                students.length = 0;
+                students.push(...unique);
+                console.log(`🧹 중복 학생 ${before - unique.length}명 제거됨`);
+                return true;
+            }
+            return false;
         }
 
         function getStudentById(studentId) {
@@ -4562,13 +4583,15 @@
                             const fieldsChanged = ensureNewFields();
                             normalizeStudentPhones();
                             const changed = ensureStudentIds();
-                            if (fieldsChanged || changed) saveStudentsData();
+                            const deduped = removeDuplicateStudents();
+                            if (fieldsChanged || changed || deduped) saveStudentsData();
                         } else {
                             students.length = 0;
                             students.push(...JSON.parse(JSON.stringify(defaultStudents)));
                             ensureNewFields();
                             normalizeStudentPhones();
                             ensureStudentIds();
+                            removeDuplicateStudents();
                             saveStudentsData();
                         }
                         renderStudents();
@@ -4594,13 +4617,15 @@
                 const fieldsChanged = ensureNewFields();
                 normalizeStudentPhones();
                 const changed = ensureStudentIds();
-                if (fieldsChanged || changed) saveStudentsData();
+                const deduped = removeDuplicateStudents();
+                if (fieldsChanged || changed || deduped) saveStudentsData();
             } else {
                 students.length = 0;
                 students.push(...JSON.parse(JSON.stringify(defaultStudents)));
                 ensureNewFields();
                 normalizeStudentPhones();
                 ensureStudentIds();
+                removeDuplicateStudents();
             }
         }
 

@@ -1542,7 +1542,7 @@
             <div class="management-card">
                 <h3>엑셀 파일로 학생 일괄 추가</h3>
                 <p>.xlsx, .xls, .csv 파일을 업로드하여 학생을 일괄 추가할 수 있습니다.<br>
-                   엑셀 컬럼: 이름, 학년, 반, 과목(쉼표 또는 | 구분), 수령(픽업/택배), 학생 전화번호, 학부모 전화번호, 접속 코드(선택)</p>
+                   엑셀 컬럼: 이름, 학년, 번호(권장), 반, 과목(쉼표 또는 | 구분), 수령(픽업/택배), 학생 전화번호, 학부모 전화번호, 접속 코드(선택)</p>
 
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-area-icon">📁</div>
@@ -1583,6 +1583,7 @@
                 </div>
                 <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
                     <button class="btn btn-primary" onclick="toggleEditModeTab3()">과목/학생 편집</button>
+                    <button class="btn btn-success" onclick="cleanupDuplicateStudentsNow()">중복 정리</button>
                     <button class="btn btn-danger" onclick="resetToDefaultStudents()">학생 데이터 초기화</button>
                     <button class="btn btn-warning" onclick="clearAllStudents()">학생 전체 삭제</button>
                 </div>
@@ -2034,7 +2035,7 @@
 
         // 엑셀 업로드 임시 데이터
         let pendingExcelStudents = [];
-        let pendingExcelUpdatedCount = 0;
+        let pendingExcelUpdates = [];
 
         const defaultSubjectPool = [
             '국어', '영어', '수학', '과학', '사회', '한국사',
@@ -2648,6 +2649,33 @@
             return text;
         }
 
+        function parseStudentNum(raw) {
+            const parsed = parseInt(String(raw || '').replace(/[^0-9]/g, ''), 10);
+            if (!Number.isFinite(parsed) || parsed <= 0) return null;
+            return parsed;
+        }
+
+        function makeStudentIdentityKey(name, grade, num, classInfo) {
+            const safeName = String(name || '').trim();
+            const safeClass = String(classInfo || '').trim();
+            if (Number.isFinite(num) && num > 0) {
+                return `NUM:${grade}:${num}:${safeName}`;
+            }
+            return `CLASS:${grade}:${safeClass}:${safeName}`;
+        }
+
+        function getStudentIdentityKey(student) {
+            return makeStudentIdentityKey(student.name, student.grade, parseStudentNum(student.num), student.class);
+        }
+
+        function mergeSubjectList(base, incoming) {
+            const result = Array.isArray(base) ? [...base] : [];
+            (Array.isArray(incoming) ? incoming : []).forEach(subject => {
+                if (!result.includes(subject)) result.push(subject);
+            });
+            return result;
+        }
+
         function generateStudentId() {
             if (window.crypto && typeof window.crypto.randomUUID === 'function') {
                 return `sid_${window.crypto.randomUUID()}`;
@@ -2675,23 +2703,38 @@
         }
 
         function removeDuplicateStudents() {
-            const seen = new Set();
+            const seen = new Map();
             const before = students.length;
             const unique = [];
             students.forEach(s => {
-                const key = `${s.name}_${s.grade}_${s.class}`;
+                const key = getStudentIdentityKey(s);
                 if (!seen.has(key)) {
-                    seen.add(key);
+                    seen.set(key, s);
                     unique.push(s);
+                } else {
+                    const target = seen.get(key);
+                    target.subjects = mergeSubjectList(target.subjects, s.subjects);
+                    if (!target.phone && s.phone) target.phone = s.phone;
+                    if (!target.parentPhone && s.parentPhone) target.parentPhone = s.parentPhone;
+                    target.parentPhones = mergeSubjectList(target.parentPhones || [], s.parentPhones || []);
+                    target.parentPhoneKeys = mergeSubjectList(target.parentPhoneKeys || [], s.parentPhoneKeys || []);
+                    if (!target.deliveryType && s.deliveryType) target.deliveryType = s.deliveryType;
+                    if (!target.accessCode && s.accessCode) target.accessCode = s.accessCode;
+                    if (!target.accessCodeCreatedAt && s.accessCodeCreatedAt) target.accessCodeCreatedAt = s.accessCodeCreatedAt;
+                    target.paymentAmount = Math.max(target.paymentAmount || 0, s.paymentAmount || 0);
+                    target.unpaidAmount = Math.max(target.unpaidAmount || 0, s.unpaidAmount || 0);
+                    if (!target.paymentStatus && s.paymentStatus) target.paymentStatus = s.paymentStatus;
+                    target.paymentConfirmed = Boolean(target.paymentConfirmed || s.paymentConfirmed);
                 }
             });
             if (unique.length < before) {
                 students.length = 0;
                 students.push(...unique);
-                console.log(`🧹 중복 학생 ${before - unique.length}명 제거됨`);
-                return true;
+                const removedCount = before - unique.length;
+                console.log(`🧹 중복 학생 ${removedCount}명 제거됨`);
+                return removedCount;
             }
-            return false;
+            return 0;
         }
 
         function getStudentById(studentId) {
@@ -4236,12 +4279,22 @@
                         return;
                     }
 
-                    // 학생 데이터 파싱
-                    const rawParsed = [];
-                    const duplicates = [];
-                    const invalidGrades = [];
-                    const updatedExisting = [];
+                    const hasCols = {
+                        num: colMap.num >= 0,
+                        class: colMap.class >= 0,
+                        subjects: colMap.subjects >= 0,
+                        phone: colMap.phone >= 0,
+                        parentPhone: colMap.parentPhone >= 0,
+                        delivery: colMap.delivery >= 0,
+                        code: colMap.code >= 0,
+                        paymentAmount: colMap.paymentAmount >= 0,
+                        unpaidAmount: colMap.unpaidAmount >= 0,
+                        paymentStatus: colMap.paymentStatus >= 0
+                    };
 
+                    const uploadMergedRows = [];
+                    const invalidGrades = [];
+                    const candidateMap = new Map();
                     rows.forEach((row, idx) => {
                         const name = colMap.name >= 0 ? String(row[colMap.name] || '').trim() : '';
                         if (!name) return;
@@ -4255,6 +4308,7 @@
 
                         const classRaw = colMap.class >= 0 ? String(row[colMap.class] || '').trim() : '';
                         const classInfo = classRaw.includes('반') ? classRaw : (classRaw ? classRaw + '반' : '1반');
+                        const num = colMap.num >= 0 ? parseStudentNum(row[colMap.num]) : null;
 
                         const subjectsRaw = colMap.subjects >= 0 ? String(row[colMap.subjects] || '').trim() : '';
                         const subjects = subjectsRaw ? subjectsRaw.split(/[,，、|]/).map(s => s.trim()).filter(s => s) : [];
@@ -4270,82 +4324,97 @@
 
                         // 입금 관련 데이터 파싱
                         const paymentAmount = colMap.paymentAmount >= 0
-                            ? parseInt(String(row[colMap.paymentAmount] || '0').replace(/[^0-9]/g, '')) || 0 : 0;
+                            ? parseInt(String(row[colMap.paymentAmount] || '0').replace(/[^0-9]/g, ''), 10) || 0 : null;
                         const unpaidAmount = colMap.unpaidAmount >= 0
-                            ? parseInt(String(row[colMap.unpaidAmount] || '0').replace(/[^0-9]/g, '')) || 0 : 0;
+                            ? parseInt(String(row[colMap.unpaidAmount] || '0').replace(/[^0-9]/g, ''), 10) || 0 : null;
                         const paymentStatus = colMap.paymentStatus >= 0
-                            ? String(row[colMap.paymentStatus] || '').trim() : '';
-                        const paymentConfirmed = parsePaymentConfirmed(paymentStatus, paymentAmount, unpaidAmount);
+                            ? String(row[colMap.paymentStatus] || '').trim() : null;
+                        const hasPaymentSignal = hasCols.paymentAmount || hasCols.unpaidAmount || hasCols.paymentStatus;
+                        const paymentConfirmed = hasPaymentSignal
+                            ? parsePaymentConfirmed(paymentStatus || '', paymentAmount || 0, unpaidAmount || 0)
+                            : null;
 
-                        // 중복 감지 (이름 + 학년 + 반)
-                        const isDuplicate = students.some(s =>
-                            s.name === name && s.grade === grade && s.class === classInfo
-                        );
+                        const candidate = {
+                            name, grade, num, class: classInfo, subjects,
+                            phone, parentPhone, parentPhones, parentPhoneKeys,
+                            deliveryType, accessCode,
+                            paymentAmount, unpaidAmount, paymentStatus, paymentConfirmed
+                        };
 
-                        if (isDuplicate) {
-                            // 기존 학생 입금정보 업데이트
-                            const existing = students.find(s => s.name === name && s.grade === grade && s.class === classInfo);
-                            if (existing) {
-                                if (paymentAmount > 0) {
-                                    existing.paymentAmount = (existing.paymentAmount || 0) + paymentAmount;
-                                }
-                                if (unpaidAmount > 0) {
-                                    existing.unpaidAmount = (existing.unpaidAmount || 0) + unpaidAmount;
-                                }
-                                if (paymentStatus) {
-                                    existing.paymentStatus = paymentStatus || existing.paymentStatus || '';
-                                }
-                                if (paymentConfirmed) existing.paymentConfirmed = true;
-                                if (paymentAmount > 0 || unpaidAmount > 0 || paymentStatus) {
-                                    updatedExisting.push({ name, grade, classInfo, paymentAmount });
-                                }
+                        const uploadKey = makeStudentIdentityKey(name, grade, num, classInfo);
+                        if (candidateMap.has(uploadKey)) {
+                            const merged = candidateMap.get(uploadKey);
+                            merged.subjects = mergeSubjectList(merged.subjects, candidate.subjects);
+                            if (candidate.phone) merged.phone = candidate.phone;
+                            if (candidate.parentPhones.length > 0) {
+                                merged.parentPhones = mergeSubjectList(merged.parentPhones, candidate.parentPhones);
+                                merged.parentPhoneKeys = mergeSubjectList(merged.parentPhoneKeys, candidate.parentPhoneKeys);
+                                merged.parentPhone = merged.parentPhones[0] || '';
                             }
-                            duplicates.push({ name, grade, classInfo, rowNum: idx + 2 });
+                            if (candidate.deliveryType) merged.deliveryType = candidate.deliveryType;
+                            if (candidate.accessCode) merged.accessCode = candidate.accessCode;
+                            if (hasCols.paymentAmount && candidate.paymentAmount !== null) merged.paymentAmount = candidate.paymentAmount;
+                            if (hasCols.unpaidAmount && candidate.unpaidAmount !== null) merged.unpaidAmount = candidate.unpaidAmount;
+                            if (hasCols.paymentStatus) merged.paymentStatus = candidate.paymentStatus;
+                            if (hasPaymentSignal && candidate.paymentConfirmed !== null) merged.paymentConfirmed = candidate.paymentConfirmed;
+                            uploadMergedRows.push({ name, grade, classInfo, rowNum: idx + 2 });
                         } else {
-                            rawParsed.push({
-                                name, grade, class: classInfo, subjects,
-                                phone, parentPhone, parentPhones, parentPhoneKeys,
-                                deliveryType,
-                                accessCode: accessCode,
-                                cashReceipt: false, mobileUrl: false, paymentConfirmed: paymentConfirmed,
-                                paymentAmount, unpaidAmount, paymentStatus
+                            candidateMap.set(uploadKey, candidate);
+                        }
+                    });
+
+                    const parsedCandidates = Array.from(candidateMap.values());
+                    const newStudents = [];
+                    const updatePlans = [];
+                    parsedCandidates.forEach(candidate => {
+                        let existing = null;
+                        if (candidate.num !== null) {
+                            existing = students.find(s =>
+                                s.name === candidate.name &&
+                                s.grade === candidate.grade &&
+                                parseStudentNum(s.num) === candidate.num
+                            ) || null;
+                        }
+                        if (!existing) {
+                            existing = students.find(s =>
+                                s.name === candidate.name &&
+                                s.grade === candidate.grade &&
+                                s.class === candidate.class
+                            ) || null;
+                        }
+                        if (existing) {
+                            updatePlans.push({ id: existing.id, candidate });
+                        } else {
+                            newStudents.push({
+                                name: candidate.name,
+                                grade: candidate.grade,
+                                num: candidate.num,
+                                class: candidate.class,
+                                subjects: candidate.subjects || [],
+                                phone: candidate.phone || '',
+                                parentPhone: candidate.parentPhone || '',
+                                parentPhones: candidate.parentPhones || [],
+                                parentPhoneKeys: candidate.parentPhoneKeys || [],
+                                deliveryType: candidate.deliveryType || '',
+                                accessCode: candidate.accessCode || '',
+                                cashReceipt: false,
+                                mobileUrl: false,
+                                paymentConfirmed: candidate.paymentConfirmed === null ? false : candidate.paymentConfirmed,
+                                paymentAmount: candidate.paymentAmount === null ? 0 : candidate.paymentAmount,
+                                unpaidAmount: candidate.unpaidAmount === null ? 0 : candidate.unpaidAmount,
+                                paymentStatus: candidate.paymentStatus === null ? '' : candidate.paymentStatus
                             });
                         }
                     });
 
-                    // 업로드 데이터 내 동일 학생(이름+학년+반) 합산
-                    const mergedMap = {};
-                    rawParsed.forEach(s => {
-                        const key = `${s.name}_${s.grade}_${s.class}`;
-                        if (mergedMap[key]) {
-                            mergedMap[key].paymentAmount = (mergedMap[key].paymentAmount || 0) + (s.paymentAmount || 0);
-                            mergedMap[key].unpaidAmount = (mergedMap[key].unpaidAmount || 0) + (s.unpaidAmount || 0);
-                            if (s.paymentStatus) mergedMap[key].paymentStatus = s.paymentStatus;
-                            // 과목 합산 (중복 제거)
-                            s.subjects.forEach(subj => {
-                                if (!mergedMap[key].subjects.includes(subj)) {
-                                    mergedMap[key].subjects.push(subj);
-                                }
-                            });
-                        } else {
-                            mergedMap[key] = { ...s };
-                        }
-                    });
-                    const parsed = Object.values(mergedMap);
-
-                    if (parsed.length === 0 && duplicates.length === 0) {
+                    if (newStudents.length === 0 && updatePlans.length === 0) {
                         alert('유효한 학생 데이터를 찾을 수 없습니다.');
                         return;
                     }
 
-                    // 기존 학생 업데이트분이 있으면 저장
-                    if (updatedExisting.length > 0) {
-                        saveStudentsData();
-                    }
-
-                    pendingExcelStudents = parsed;
-                    pendingExcelUpdatedCount = updatedExisting.length;
-                    showExcelPreview(parsed, duplicates, invalidGrades, updatedExisting);
+                    pendingExcelStudents = newStudents;
+                    pendingExcelUpdates = updatePlans;
+                    showExcelPreview(newStudents, uploadMergedRows, invalidGrades, updatePlans);
 
                 } catch (err) {
                     console.error('Excel parse error:', err);
@@ -4356,12 +4425,13 @@
         }
 
         function autoMapColumns(headers) {
-            const map = { name: -1, grade: -1, class: -1, subjects: -1, phone: -1, parentPhone: -1, delivery: -1, code: -1, paymentAmount: -1, paymentStatus: -1, unpaidAmount: -1 };
+            const map = { name: -1, grade: -1, class: -1, num: -1, subjects: -1, phone: -1, parentPhone: -1, delivery: -1, code: -1, paymentAmount: -1, paymentStatus: -1, unpaidAmount: -1 };
 
             headers.forEach((h, i) => {
                 const lower = h.toLowerCase();
                 if (lower.includes('이름') || lower === 'name') map.name = i;
                 else if (lower.includes('학년') || lower === 'grade') map.grade = i;
+                else if ((lower === '번호' || lower.includes('학생번호') || lower.includes('학생 번호') || /^no\.?$/.test(lower)) && !lower.includes('전화')) map.num = i;
                 else if (lower.includes('반') || lower === 'class') map.class = i;
                 else if (lower.includes('과목') || lower === 'subject') map.subjects = i;
                 else if (lower.includes('택배') || lower.includes('배송') || lower.includes('수령') || lower.includes('픽업') || lower.includes('pickup')) map.delivery = i;
@@ -4391,13 +4461,11 @@
             const dupWarning = document.getElementById('duplicateWarning');
             const warnings = [];
             if (duplicates.length > 0) {
-                warnings.push(`⚠️ ${duplicates.length}명의 중복 학생이 건너뛰어졌습니다: ` +
-                    duplicates.map(d => `${d.name}(${d.grade}학년 ${d.classInfo})`).join(', '));
+                warnings.push(`ℹ️ 업로드 파일 내 중복 행 ${duplicates.length}건을 자동 병합했습니다.`);
             }
 
             if (updatedExisting && updatedExisting.length > 0) {
-                warnings.push(`ℹ️ 기존 학생 ${updatedExisting.length}명의 입금정보가 업데이트됩니다: ` +
-                    updatedExisting.map(d => `${d.name}(${d.grade}학년, +${d.paymentAmount.toLocaleString()}원)`).join(', '));
+                warnings.push(`ℹ️ 기존 학생 ${updatedExisting.length}명은 신규 추가되지 않고 변경값만 업데이트됩니다.`);
             }
 
             if (invalidGrades && invalidGrades.length > 0) {
@@ -4442,18 +4510,69 @@
         }
 
         function confirmExcelUpload() {
-            if (pendingExcelStudents.length === 0 && pendingExcelUpdatedCount === 0) {
-                alert('추가할 학생이 없습니다.');
+            if (pendingExcelStudents.length === 0 && pendingExcelUpdates.length === 0) {
+                alert('처리할 학생이 없습니다.');
                 cancelExcelUpload();
                 return;
             }
 
-            // 번호 자동 생성 후 추가
             const existingCodes = new Set(students.map(s => s.accessCode).filter(Boolean));
+            pendingExcelUpdates.forEach(plan => {
+                const existing = students.find(s => s.id === plan.id);
+                if (!existing) return;
+                const candidate = plan.candidate;
+
+                if (candidate.subjects.length > 0) {
+                    existing.subjects = mergeSubjectList(existing.subjects, candidate.subjects);
+                }
+                if (candidate.class && candidate.class !== existing.class) {
+                    existing.class = candidate.class;
+                }
+                if (candidate.phone) {
+                    existing.phone = candidate.phone;
+                }
+                if (candidate.parentPhones && candidate.parentPhones.length > 0) {
+                    const mergedParents = mergeSubjectList(getStudentParentPhones(existing), candidate.parentPhones);
+                    existing.parentPhones = mergedParents;
+                    existing.parentPhone = mergedParents[0] || existing.parentPhone || '';
+                    existing.parentPhoneKeys = mergeSubjectList(getStudentParentPhoneKeys(existing), candidate.parentPhoneKeys || []);
+                }
+                if (candidate.deliveryType) {
+                    existing.deliveryType = candidate.deliveryType;
+                }
+                if (candidate.accessCode) {
+                    const normalizedCode = normalizeAccessCode(candidate.accessCode);
+                    if (normalizedCode && normalizedCode !== existing.accessCode && !existingCodes.has(normalizedCode)) {
+                        existingCodes.delete(existing.accessCode);
+                        existing.accessCode = normalizedCode;
+                        existing.accessCodeCreatedAt = new Date().toISOString();
+                        existingCodes.add(normalizedCode);
+                    }
+                }
+                if (candidate.paymentAmount !== null) {
+                    existing.paymentAmount = candidate.paymentAmount;
+                }
+                if (candidate.unpaidAmount !== null) {
+                    existing.unpaidAmount = candidate.unpaidAmount;
+                }
+                if (candidate.paymentStatus !== null) {
+                    existing.paymentStatus = candidate.paymentStatus || '';
+                }
+                if (candidate.paymentConfirmed !== null) {
+                    existing.paymentConfirmed = candidate.paymentConfirmed;
+                }
+            });
+
             pendingExcelStudents.forEach(s => {
                 const sameGrade = students.filter(st => st.grade === s.grade);
-                const maxNum = sameGrade.length > 0 ? Math.max(...sameGrade.map(st => st.num)) : 0;
-                s.num = maxNum + 1;
+                const parsedNum = parseStudentNum(s.num);
+                const hasConflict = parsedNum !== null && students.some(st => st.grade === s.grade && parseStudentNum(st.num) === parsedNum);
+                if (parsedNum !== null && !hasConflict) {
+                    s.num = parsedNum;
+                } else {
+                    const maxNum = sameGrade.length > 0 ? Math.max(...sameGrade.map(st => parseStudentNum(st.num) || 0)) : 0;
+                    s.num = maxNum + 1;
+                }
                 s.id = generateStudentId();
                 if (!s.accessCode) {
                     s.accessCode = generateAccessCode(existingCodes);
@@ -4484,9 +4603,9 @@
             if (pendingExcelStudents.length > 0) {
                 msg += `${pendingExcelStudents.length}명의 학생이 추가되었습니다.`;
             }
-            if (pendingExcelUpdatedCount > 0) {
+            if (pendingExcelUpdates.length > 0) {
                 if (msg) msg += '\n';
-                msg += `기존 학생 ${pendingExcelUpdatedCount}명의 입금정보가 업데이트되었습니다.`;
+                msg += `기존 학생 ${pendingExcelUpdates.length}명의 정보가 업데이트되었습니다.`;
             }
             alert(msg || '처리가 완료되었습니다.');
             cancelExcelUpload();
@@ -4494,7 +4613,7 @@
 
         function cancelExcelUpload() {
             pendingExcelStudents = [];
-            pendingExcelUpdatedCount = 0;
+            pendingExcelUpdates = [];
             document.getElementById('uploadArea').style.display = '';
             document.getElementById('excelPreview').style.display = 'none';
         }
@@ -4706,6 +4825,22 @@
             updateStats();
             if (currentTab === 2) renderTab2();
             if (currentTab === 3) renderTab3();
+        }
+
+        function cleanupDuplicateStudentsNow() {
+            const removedCount = removeDuplicateStudents();
+            if (removedCount === 0) {
+                alert('정리할 중복 학생이 없습니다.');
+                return;
+            }
+
+            saveStudentsData();
+            renderStudents();
+            updateStats();
+            if (currentTab === 2) renderTab2();
+            if (currentTab === 3) renderTab3();
+            showSaveIndicator();
+            alert(`중복 학생 ${removedCount}명이 병합 정리되었습니다.`);
         }
 
         // ==================== 학생 추가/삭제 ====================

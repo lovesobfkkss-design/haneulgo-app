@@ -2659,7 +2659,7 @@
             const safeName = String(name || '').trim();
             const safeClass = String(classInfo || '').trim();
             if (Number.isFinite(num) && num > 0) {
-                return `NUM:${grade}:${num}:${safeName}`;
+                return `NUM:${num}:${safeName}`;
             }
             return `CLASS:${grade}:${safeClass}:${safeName}`;
         }
@@ -4371,7 +4371,6 @@
                         if (candidate.num !== null) {
                             existing = students.find(s =>
                                 s.name === candidate.name &&
-                                s.grade === candidate.grade &&
                                 parseStudentNum(s.num) === candidate.num
                             ) || null;
                         }
@@ -4524,6 +4523,12 @@
 
                 if (candidate.subjects.length > 0) {
                     existing.subjects = mergeSubjectList(existing.subjects, candidate.subjects);
+                }
+                if (candidate.grade && candidate.grade !== existing.grade) {
+                    existing.grade = candidate.grade;
+                }
+                if (candidate.num !== null && candidate.num !== existing.num) {
+                    existing.num = candidate.num;
                 }
                 if (candidate.class && candidate.class !== existing.class) {
                     existing.class = candidate.class;

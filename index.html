@@ -2655,17 +2655,69 @@
             return parsed;
         }
 
-        function makeStudentIdentityKey(name, grade, num, classInfo) {
-            const safeName = String(name || '').trim();
-            const safeClass = String(classInfo || '').trim();
-            if (Number.isFinite(num) && num > 0) {
-                return `NUM:${num}:${safeName}`;
-            }
-            return `CLASS:${grade}:${safeClass}:${safeName}`;
+        function getNameKey(raw) {
+            return String(raw || '').trim();
         }
 
-        function getStudentIdentityKey(student) {
-            return makeStudentIdentityKey(student.name, student.grade, parseStudentNum(student.num), student.class);
+        function getPhoneKey(raw) {
+            return normalizePhoneDigits(raw);
+        }
+
+        function getParentPhoneKeysForIdentity(record) {
+            if (Array.isArray(record.parentPhoneKeys) && record.parentPhoneKeys.length > 0) {
+                return record.parentPhoneKeys.filter(Boolean);
+            }
+            if (Array.isArray(record.parentPhones) && record.parentPhones.length > 0) {
+                return record.parentPhones.map(v => toE164Korea(v)).filter(Boolean);
+            }
+            if (record.parentPhone) {
+                const key = toE164Korea(record.parentPhone);
+                return key ? [key] : [];
+            }
+            return [];
+        }
+
+        function intersects(arrA, arrB) {
+            if (!arrA.length || !arrB.length) return false;
+            const setB = new Set(arrB);
+            return arrA.some(v => setB.has(v));
+        }
+
+        function isSameStudentIdentity(a, b) {
+            const nameA = getNameKey(a.name);
+            const nameB = getNameKey(b.name);
+            if (!nameA || nameA !== nameB) return false;
+
+            const numA = parseStudentNum(a.num);
+            const numB = parseStudentNum(b.num);
+            if (numA !== null && numB !== null && numA === numB) return true;
+
+            const phoneA = getPhoneKey(a.phone);
+            const phoneB = getPhoneKey(b.phone);
+            if (phoneA && phoneB && phoneA === phoneB) return true;
+
+            const parentA = getParentPhoneKeysForIdentity(a);
+            const parentB = getParentPhoneKeysForIdentity(b);
+            if (intersects(parentA, parentB)) return true;
+
+            return (
+                Number(a.grade) === Number(b.grade) &&
+                String(a.class || '').trim() === String(b.class || '').trim()
+            );
+        }
+
+        function makeStudentIdentityKey(name, grade, num, classInfo, phone, parentPhoneKeys) {
+            const safeName = getNameKey(name);
+            const phoneKey = getPhoneKey(phone);
+            if (safeName && phoneKey) return `PHONE:${safeName}:${phoneKey}`;
+
+            const parentKey = Array.isArray(parentPhoneKeys) && parentPhoneKeys.length > 0 ? parentPhoneKeys[0] : '';
+            if (safeName && parentKey) return `PARENT:${safeName}:${parentKey}`;
+
+            if (safeName && Number.isFinite(num) && num > 0) return `NUM:${safeName}:${num}`;
+
+            const safeClass = String(classInfo || '').trim();
+            return `CLASS:${safeName}:${grade}:${safeClass}`;
         }
 
         function mergeSubjectList(base, incoming) {
@@ -2703,16 +2755,14 @@
         }
 
         function removeDuplicateStudents() {
-            const seen = new Map();
             const before = students.length;
             const unique = [];
             students.forEach(s => {
-                const key = getStudentIdentityKey(s);
-                if (!seen.has(key)) {
-                    seen.set(key, s);
+                const existingIndex = unique.findIndex(u => isSameStudentIdentity(u, s));
+                if (existingIndex === -1) {
                     unique.push(s);
                 } else {
-                    const target = seen.get(key);
+                    const target = unique[existingIndex];
                     target.subjects = mergeSubjectList(target.subjects, s.subjects);
                     if (!target.phone && s.phone) target.phone = s.phone;
                     if (!target.parentPhone && s.parentPhone) target.parentPhone = s.parentPhone;
@@ -4341,7 +4391,7 @@
                             paymentAmount, unpaidAmount, paymentStatus, paymentConfirmed
                         };
 
-                        const uploadKey = makeStudentIdentityKey(name, grade, num, classInfo);
+                        const uploadKey = makeStudentIdentityKey(name, grade, num, classInfo, phone, parentPhoneKeys);
                         if (candidateMap.has(uploadKey)) {
                             const merged = candidateMap.get(uploadKey);
                             merged.subjects = mergeSubjectList(merged.subjects, candidate.subjects);
@@ -4367,20 +4417,7 @@
                     const newStudents = [];
                     const updatePlans = [];
                     parsedCandidates.forEach(candidate => {
-                        let existing = null;
-                        if (candidate.num !== null) {
-                            existing = students.find(s =>
-                                s.name === candidate.name &&
-                                parseStudentNum(s.num) === candidate.num
-                            ) || null;
-                        }
-                        if (!existing) {
-                            existing = students.find(s =>
-                                s.name === candidate.name &&
-                                s.grade === candidate.grade &&
-                                s.class === candidate.class
-                            ) || null;
-                        }
+                        const existing = students.find(s => isSameStudentIdentity(s, candidate)) || null;
                         if (existing) {
                             updatePlans.push({ id: existing.id, candidate });
                         } else {

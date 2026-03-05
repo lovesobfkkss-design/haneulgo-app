@@ -277,6 +277,32 @@
             border-bottom-color: #3498db;
         }
 
+        .editable-grade {
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+            background: #3498db;
+            border-bottom: 1px dashed transparent;
+            transition: background 0.2s;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        .editable-grade:hover {
+            background: #2980b9;
+        }
+
+        .grade-select-inline {
+            font-size: 13px;
+            padding: 2px 4px;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+            outline: none;
+        }
+
         .editable-delivery {
             cursor: pointer;
             padding: 4px 8px;
@@ -2943,7 +2969,8 @@
                 ? `<button class="sms-btn" onclick="openSMSApp(${JSON.stringify(student.id)})" title="학부모에게 문자 보내기">문자</button>`
                 : '';
 
-            const classHtml = `<span class="class-info editable-class" id="class-${makeSafeId(student.id)}" data-edit-class="${encodeURIComponent(student.id)}" title="클릭하여 반 수정">${student.class}</span>`;
+            const gradeHtml = `<span class="editable-grade" data-edit-grade="${encodeURIComponent(student.id)}" title="클릭하여 학년 수정">${student.grade}학년</span>`;
+            const classHtml = `${gradeHtml}<span class="class-info editable-class" id="class-${makeSafeId(student.id)}" data-edit-class="${encodeURIComponent(student.id)}" title="클릭하여 반 수정">${student.class}</span>`;
 
             const subjectCheckboxesHtml = student.subjects.length > 0
                 ? student.subjects.map(subj => `
@@ -3264,7 +3291,8 @@
             rows.forEach(row => {
                 const classCell = row.cells[2];
                 if (!classCell) return;
-                const classText = classCell.textContent.trim();
+                const classSpan = classCell.querySelector('.editable-class');
+                const classText = classSpan ? classSpan.textContent.trim() : classCell.textContent.trim();
 
                 if (selectedClass === 'all') {
                     row.style.display = '';
@@ -3540,6 +3568,14 @@
         }
 
         document.addEventListener('click', (e) => {
+            // 학년 수정 클릭
+            const gradeEl = e.target.closest('.editable-grade');
+            if (gradeEl && gradeEl.dataset.editGrade) {
+                const studentId = decodeURIComponent(gradeEl.dataset.editGrade);
+                showEditGrade(studentId, gradeEl);
+                return;
+            }
+
             // 반 수정 클릭
             const classEl = e.target.closest('.editable-class');
             if (classEl && classEl.dataset.editClass) {
@@ -3646,6 +3682,41 @@
 
         // 반 정보 수정
         let editingClass = null;
+
+        function showEditGrade(studentId, gradeSpan) {
+            const student = getStudentById(studentId);
+            if (!student) return;
+
+            const select = document.createElement('select');
+            select.className = 'grade-select-inline';
+            [1, 2].forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = g + '학년';
+                if (student.grade === g) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            select.onchange = () => {
+                const newGrade = parseInt(select.value);
+                if (newGrade !== student.grade) {
+                    student.grade = newGrade;
+                    saveStudentsData();
+                    showSaveIndicator();
+                    renderStudents();
+                    renderTab2();
+                    renderTab3();
+                    if (currentTab === 5) renderTab5();
+                    updateClassFilter();
+                }
+            };
+            select.onblur = () => {
+                renderStudents();
+            };
+
+            gradeSpan.parentNode.replaceChild(select, gradeSpan);
+            select.focus();
+        }
 
         function showEditClass(studentId) {
             if (editingClass) cancelEditClass();
@@ -3835,7 +3906,7 @@
             tr.innerHTML = `
                 <td>${rowIndex}</td>
                 <td class="student-name">${student.name}</td>
-                <td><span class="class-info editable-class" id="class-tab2-${makeSafeId(student.id)}" data-edit-class="${encodeURIComponent(student.id)}" data-tab="tab2" title="클릭하여 반 수정">${student.class}</span></td>
+                <td><span class="editable-grade" data-edit-grade="${encodeURIComponent(student.id)}" title="클릭하여 학년 수정">${student.grade}학년</span><span class="class-info editable-class" id="class-tab2-${makeSafeId(student.id)}" data-edit-class="${encodeURIComponent(student.id)}" data-tab="tab2" title="클릭하여 반 수정">${student.class}</span></td>
                 <td><div class="subjects">${subjectsHtml}</div></td>
                 <td><span class="editable-delivery" data-student-id="${encodeURIComponent(student.id)}" onclick="cycleDeliveryType(this)" title="클릭하여 수령 방식 변경">${student.deliveryType || '-'}</span></td>
                 <td class="payment-amount editable-payment" data-student-id="${encodeURIComponent(student.id)}">${student.paymentAmount ? student.paymentAmount.toLocaleString() + '원' : '-'}</td>
@@ -3955,7 +4026,8 @@
             rows.forEach(row => {
                 const classCell = row.cells[2];
                 if (!classCell) return;
-                const classText = classCell.textContent.trim();
+                const classSpan = classCell.querySelector('.editable-class');
+                const classText = classSpan ? classSpan.textContent.trim() : classCell.textContent.trim();
 
                 if (selectedClass === 'all') {
                     row.style.display = '';
@@ -4025,7 +4097,7 @@
                 <td>${rowIndex}</td>
                 <td class="student-name">${student.name}</td>
                 <td>${student.grade}학년</td>
-                <td><span class="class-info editable-class" data-edit-class="${encodeURIComponent(student.id)}" data-tab="tab5" title="클릭하여 반 수정">${student.class}</span></td>
+                <td><span class="editable-grade" data-edit-grade="${encodeURIComponent(student.id)}" title="클릭하여 학년 수정">${student.grade}학년</span><span class="class-info editable-class" data-edit-class="${encodeURIComponent(student.id)}" data-tab="tab5" title="클릭하여 반 수정">${student.class}</span></td>
                 <td><div class="subjects">${subjectsHtml}</div></td>
                 <td class="payment-amount editable-payment" data-student-id="${encodeURIComponent(student.id)}">${student.paymentAmount ? student.paymentAmount.toLocaleString() + '원' : '-'}</td>
                 ${shippingCol}
@@ -4132,7 +4204,7 @@
             tr.innerHTML = `
                 <td>${rowIndex}</td>
                 <td class="student-name">${student.name} ${deleteButtonHtml}</td>
-                <td><span class="class-info editable-class" id="class-tab3-${makeSafeId(student.id)}" data-edit-class="${encodeURIComponent(student.id)}" data-tab="tab3" title="클릭하여 반 수정">${student.class}</span></td>
+                <td><span class="editable-grade" data-edit-grade="${encodeURIComponent(student.id)}" title="클릭하여 학년 수정">${student.grade}학년</span><span class="class-info editable-class" id="class-tab3-${makeSafeId(student.id)}" data-edit-class="${encodeURIComponent(student.id)}" data-tab="tab3" title="클릭하여 반 수정">${student.class}</span></td>
                 <td>${subjectsHtml}</td>
                 <td><span class="editable-delivery" data-student-id="${encodeURIComponent(student.id)}" onclick="cycleDeliveryType(this)" title="클릭하여 수령 방식 변경">${student.deliveryType || '-'}</span></td>
                 <td class="phone">${student.phone || '-'}</td>
@@ -4357,7 +4429,7 @@
                         }
 
                         const classRaw = colMap.class >= 0 ? String(row[colMap.class] || '').trim() : '';
-                        const classInfo = classRaw.includes('반') ? classRaw : (classRaw ? classRaw + '반' : '1반');
+                        const classInfo = classRaw ? (classRaw.includes('반') ? classRaw : classRaw + '반') : '';
                         const num = colMap.num >= 0 ? parseStudentNum(row[colMap.num]) : null;
 
                         const subjectsRaw = colMap.subjects >= 0 ? String(row[colMap.subjects] || '').trim() : '';
@@ -4417,7 +4489,14 @@
                     const newStudents = [];
                     const updatePlans = [];
                     parsedCandidates.forEach(candidate => {
-                        const existing = students.find(s => isSameStudentIdentity(s, candidate)) || null;
+                        let existing = students.find(s => isSameStudentIdentity(s, candidate)) || null;
+                        if (!existing && candidate.class) {
+                            existing = students.find(s =>
+                                s.name === candidate.name &&
+                                s.grade === candidate.grade &&
+                                s.class === candidate.class
+                            ) || null;
+                        }
                         if (existing) {
                             updatePlans.push({ id: existing.id, candidate });
                         } else {
@@ -4425,7 +4504,7 @@
                                 name: candidate.name,
                                 grade: candidate.grade,
                                 num: candidate.num,
-                                class: candidate.class,
+                                class: candidate.class || '1반',
                                 subjects: candidate.subjects || [],
                                 phone: candidate.phone || '',
                                 parentPhone: candidate.parentPhone || '',

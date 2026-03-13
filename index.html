@@ -327,6 +327,21 @@
             border-bottom-color: #3498db;
         }
 
+        .editable-phone {
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            border-bottom: 1px dashed #bbb;
+            display: inline-block;
+            min-width: 84px;
+        }
+
+        .editable-phone:hover {
+            background: #e8f4fd;
+            border-bottom-color: #3498db;
+        }
+
         .class-input {
             padding: 4px 8px;
             border: 1px solid #3498db;
@@ -1431,6 +1446,7 @@
                                 <th class="phone">학생 전화번호</th>
                                 <th class="phone">학부모 전화번호</th>
                                 <th>입금액</th>
+                                <th style="text-align:center;">택배비</th>
                                 <th>입금확인</th>
                                 <th>배부완료</th>
                             </tr>
@@ -1457,6 +1473,7 @@
                                 <th class="phone">학생 전화번호</th>
                                 <th class="phone">학부모 전화번호</th>
                                 <th>입금액</th>
+                                <th style="text-align:center;">택배비</th>
                                 <th>입금확인</th>
                                 <th>배부완료</th>
                             </tr>
@@ -1631,6 +1648,7 @@
                                         <th>수령</th>
                                         <th class="phone">학생 전화번호</th>
                                         <th class="phone">학부모 전화번호</th>
+                                        <th style="text-align:center;">택배비</th>
                                         <th>접속 코드</th>
                                         <th>만료일</th>
                                     </tr>
@@ -1655,6 +1673,7 @@
                                         <th>수령</th>
                                         <th class="phone">학생 전화번호</th>
                                         <th class="phone">학부모 전화번호</th>
+                                        <th style="text-align:center;">택배비</th>
                                         <th>접속 코드</th>
                                         <th>만료일</th>
                                     </tr>
@@ -2983,6 +3002,12 @@
                     </div>
                 `).join('')
                 : '<span style="color: #999;">과목 없음</span>';
+            const shippingFeeHtml = student.deliveryType === '택배'
+                ? `<div class="status-toggle ${student.shippingFeePaid ? 'checked' : ''}"
+                     data-toggle-field="shippingFeePaid" data-student-id="${encodeURIComponent(student.id)}">
+                     ${student.shippingFeePaid ? '✓' : ''}
+                   </div>`
+                : '<span style="color:#999;">-</span>';
 
             tr.innerHTML = `
                 <td>${rowIndex}</td>
@@ -2994,9 +3019,10 @@
                 <td>${classHtml}</td>
                 <td>${subjectsHtml}</td>
                 <td><span class="editable-delivery" data-student-id="${encodeURIComponent(student.id)}" onclick="cycleDeliveryType(this)" title="클릭하여 수령 방식 변경">${student.deliveryType || '-'}</span></td>
-                <td class="phone">${student.phone || '-'}</td>
-                <td class="phone">${getStudentParentPhonesDisplay(student)}</td>
+                <td class="phone"><span class="editable-phone" data-student-id="${encodeURIComponent(student.id)}" data-phone-field="phone" title="클릭하여 학생 전화번호 수정" onclick="openPhoneEditor(this)">${student.phone || '-'}</span></td>
+                <td class="phone"><span class="editable-phone" data-student-id="${encodeURIComponent(student.id)}" data-phone-field="parentPhone" title="클릭하여 학부모 전화번호 수정" onclick="openPhoneEditor(this)">${getStudentParentPhonesDisplay(student)}</span></td>
                 <td class="payment-amount editable-payment" data-student-id="${encodeURIComponent(student.id)}">${student.paymentAmount ? student.paymentAmount.toLocaleString() + '원' : '-'}</td>
+                <td style="text-align:center;">${shippingFeeHtml}</td>
                 <td style="text-align:center;">${student.paymentConfirmed ? '✓' : ''}</td>
                 <td class="checkbox-cell">
                     <div class="subjects-checkboxes">
@@ -3680,6 +3706,80 @@
             input.select();
         });
 
+        function openPhoneEditor(cell) {
+            if (!cell || cell.querySelector('input')) return false;
+
+            const studentId = decodeURIComponent(cell.dataset.studentId || '');
+            const field = cell.dataset.phoneField || '';
+            if (!studentId || !field) return false;
+
+            const student = getStudentById(studentId);
+            if (!student) return false;
+
+            const input = document.createElement('input');
+            input.type = 'tel';
+            input.inputMode = 'numeric';
+            input.autocomplete = 'tel';
+            input.className = 'class-input';
+            input.style.width = '180px';
+            input.placeholder = field === 'parentPhone' ? '쉼표 또는 | 로 구분' : '010-xxxx-xxxx';
+            input.value = field === 'parentPhone'
+                ? getStudentParentPhones(student).join(', ')
+                : (student.phone || '');
+            let saved = false;
+
+            const save = () => {
+                if (saved) return;
+                saved = true;
+
+                if (field === 'parentPhone') {
+                    const parsed = parseParentPhones(input.value.trim());
+                    student.parentPhones = parsed.phones;
+                    student.parentPhoneKeys = parsed.keys;
+                    student.parentPhone = parsed.phones[0] || '';
+                } else {
+                    student.phone = normalizePhone(input.value.trim()) || '';
+                }
+
+                saveStudentsData();
+                renderStudents();
+                renderTab2();
+                renderTab3();
+                if (currentTab === 5) renderTab5();
+                showSaveIndicator();
+            };
+
+            const cancel = () => {
+                if (saved) return;
+                cell.textContent = field === 'parentPhone'
+                    ? getStudentParentPhonesDisplay(student)
+                    : (student.phone || '-');
+            };
+
+            input.onkeydown = (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    save();
+                    input.blur();
+                    return;
+                }
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    saved = true;
+                    cancel();
+                }
+            };
+            input.onblur = () => {
+                save();
+            };
+
+            cell.textContent = '';
+            cell.appendChild(input);
+            input.focus();
+            input.select();
+            return false;
+        }
+
         // 반 정보 수정
         let editingClass = null;
 
@@ -4101,7 +4201,7 @@
                 <td><div class="subjects">${subjectsHtml}</div></td>
                 <td class="payment-amount editable-payment" data-student-id="${encodeURIComponent(student.id)}">${student.paymentAmount ? student.paymentAmount.toLocaleString() + '원' : '-'}</td>
                 ${shippingCol}
-                <td class="phone">${getStudentParentPhonesDisplay(student)}</td>
+                <td class="phone"><span class="editable-phone" data-student-id="${encodeURIComponent(student.id)}" data-phone-field="parentPhone" title="클릭하여 학부모 전화번호 수정" onclick="openPhoneEditor(this)">${getStudentParentPhonesDisplay(student)}</span></td>
             `;
 
             return tr;
@@ -4200,6 +4300,12 @@
             const deleteButtonHtml = editModeTab3
                 ? `<button type="button" class="delete-student-btn" style="display:inline-block;" data-student-id="${encodeURIComponent(student.id)}" data-student-name="${encodeURIComponent(student.name)}">삭제</button>`
                 : '';
+            const shippingFeeHtml = student.deliveryType === '택배'
+                ? `<div class="status-toggle ${student.shippingFeePaid ? 'checked' : ''}"
+                     data-toggle-field="shippingFeePaid" data-student-id="${encodeURIComponent(student.id)}">
+                     ${student.shippingFeePaid ? '✓' : ''}
+                   </div>`
+                : '<span style="color:#999;">-</span>';
 
             tr.innerHTML = `
                 <td>${rowIndex}</td>
@@ -4207,8 +4313,9 @@
                 <td><span class="editable-grade" data-edit-grade="${encodeURIComponent(student.id)}" title="클릭하여 학년 수정">${student.grade}학년</span><span class="class-info editable-class" id="class-tab3-${makeSafeId(student.id)}" data-edit-class="${encodeURIComponent(student.id)}" data-tab="tab3" title="클릭하여 반 수정">${student.class}</span></td>
                 <td>${subjectsHtml}</td>
                 <td><span class="editable-delivery" data-student-id="${encodeURIComponent(student.id)}" onclick="cycleDeliveryType(this)" title="클릭하여 수령 방식 변경">${student.deliveryType || '-'}</span></td>
-                <td class="phone">${student.phone || '-'}</td>
-                <td class="phone">${getStudentParentPhonesDisplay(student)}</td>
+                <td class="phone"><span class="editable-phone" data-student-id="${encodeURIComponent(student.id)}" data-phone-field="phone" title="클릭하여 학생 전화번호 수정" onclick="openPhoneEditor(this)">${student.phone || '-'}</span></td>
+                <td class="phone"><span class="editable-phone" data-student-id="${encodeURIComponent(student.id)}" data-phone-field="parentPhone" title="클릭하여 학부모 전화번호 수정" onclick="openPhoneEditor(this)">${getStudentParentPhonesDisplay(student)}</span></td>
+                <td style="text-align:center;">${shippingFeeHtml}</td>
                 <td>
                     <span class="code-pill">${student.accessCode || '-'}</span>
                     <button class="btn btn-secondary" style="padding:4px 8px; font-size:11px; margin-left:6px;" type="button"
@@ -4750,6 +4857,8 @@
                     num: s.num,
                     class: s.class,
                     subjects: s.subjects || [],
+                    phone: s.phone || '',
+                    parentPhone: getStudentParentPhones(s)[0] || '',
                     deliveryType: s.deliveryType || '',
                     parentPhones: getStudentParentPhones(s),
                     parentPhoneKeys: getStudentParentPhoneKeys(s),

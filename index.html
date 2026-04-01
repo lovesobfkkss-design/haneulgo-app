@@ -803,6 +803,91 @@
             cursor: not-allowed;
         }
 
+        /* ==================== 탭7: 영어 오답 배부 ==================== */
+        .wa-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px 3px;
+            background: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ffcc80;
+            cursor: default;
+            transition: all 0.2s;
+        }
+
+        .wa-edit-mode .wa-tag {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .wa-edit-mode .wa-tag:hover {
+            background: #ffccbc;
+            border-color: #e74c3c;
+            text-decoration: line-through;
+        }
+
+        .wa-add-btn {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px 3px;
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px dashed #90caf9;
+            cursor: pointer;
+        }
+
+        .wa-add-btn:hover {
+            background: #bbdefb;
+        }
+
+        .wa-input {
+            padding: 3px 8px;
+            border: 1px solid #90caf9;
+            border-radius: 12px;
+            font-size: 12px;
+            width: 160px;
+            outline: none;
+        }
+
+        .wa-input:focus {
+            border-color: #1565c0;
+            box-shadow: 0 0 0 2px rgba(21, 101, 192, 0.15);
+        }
+
+        .wa-items-cell {
+            min-width: 200px;
+        }
+
+        .wa-check-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+            margin: 0 auto;
+        }
+
+        .wa-check-btn.checked {
+            background: #27ae60;
+            border-color: #27ae60;
+            color: white;
+        }
+
+        .wa-check-btn:hover {
+            border-color: #3498db;
+            transform: scale(1.1);
+        }
+
         /* ==================== 탭2: 신청/입금 현황 ==================== */
         .status-toggle {
             width: 28px;
@@ -1063,6 +1148,34 @@
             gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 10px;
+        }
+
+        .info-note {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .schedule-summary {
+            color: #2c3e50;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .schedule-summary.empty {
+            color: #999;
+        }
+
+        .inline-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .section-subtitle {
+            color: #666;
+            font-size: 13px;
+            font-weight: 500;
         }
 
         /* ==================== 반응형 ==================== */
@@ -1341,6 +1454,8 @@
             <button class="tab-btn active" onclick="switchTab(1)">배부 체크</button>
             <button class="tab-btn" onclick="switchTab(2)">신청/입금</button>
             <button class="tab-btn" onclick="switchTab(5)">택배/픽업</button>
+            <button class="tab-btn" onclick="switchTab(6)">예약대기/픽업일정</button>
+            <button class="tab-btn" onclick="switchTab(7)">영어 오답 배부</button>
             <button class="tab-btn" onclick="switchTab(3)">학생 관리</button>
             <button class="tab-btn" onclick="switchTab(4)">학부모 조회</button>
         </div>
@@ -1778,6 +1893,198 @@
             </div>
         </div>
 
+        <div class="tab-content" id="tab-6">
+            <div class="stats" id="tab6Stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="tab6PickupTotal">0</div>
+                    <div class="stat-label">픽업 학생</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="tab6PickupScheduled">0</div>
+                    <div class="stat-label">일정 입력 완료</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="tab6PickupUnscheduled">0</div>
+                    <div class="stat-label">일정 미입력</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="tab6WaitlistCount">0</div>
+                    <div class="stat-label">예약대기</div>
+                </div>
+            </div>
+
+            <div class="management-card">
+                <h3>픽업 일정 관리</h3>
+                <p class="info-note">확정 학생 중 수령 방식이 픽업인 학생만 표시됩니다. 날짜, 시간, 메모를 입력해 예약 현황을 관리합니다.</p>
+            </div>
+
+            <div class="grade-section" id="tab6PickupScheduledSection">
+                <div class="grade-header">
+                    <span>픽업 일정 입력 완료</span>
+                    <span id="tab6PickupScheduledStats">0명</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>이름</th>
+                                <th>학년</th>
+                                <th>반</th>
+                                <th>신청 과목</th>
+                                <th>픽업 일정</th>
+                                <th class="phone">학부모 전화번호</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tab6PickupScheduledBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grade-section" id="tab6PickupUnscheduledSection">
+                <div class="grade-header">
+                    <span>픽업 일정 미입력</span>
+                    <span id="tab6PickupUnscheduledStats">0명</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>이름</th>
+                                <th>학년</th>
+                                <th>반</th>
+                                <th>신청 과목</th>
+                                <th class="phone">학부모 전화번호</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tab6PickupUnscheduledBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="management-card" style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                <div>
+                    <h3 style="margin-bottom:6px;">예약대기 명단</h3>
+                    <p class="info-note" style="margin-bottom:0;">마감 이후 추가 요청자를 별도 목록으로 관리하고, 자리 확보 시 확정 학생으로 전환합니다.</p>
+                </div>
+                <button class="btn btn-primary" type="button" onclick="openWaitlistModal()">+ 예약대기 추가</button>
+            </div>
+
+            <div class="grade-section" id="tab6WaitlistSection">
+                <div class="grade-header">
+                    <span>예약대기 명단</span>
+                    <span id="tab6WaitlistStats">0명</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>이름</th>
+                                <th>학년</th>
+                                <th>반</th>
+                                <th>신청 과목</th>
+                                <th>수령</th>
+                                <th>메모</th>
+                                <th class="phone">연락처</th>
+                                <th>등록일</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tab6WaitlistBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 탭 7: 영어 오답 배부 ==================== -->
+        <div class="tab-content" id="tab-7">
+            <div class="week-info">
+                <div class="week-selector">
+                    <label for="waWeekSelect">주차 선택:</label>
+                    <input type="week" id="waWeekSelect" value="">
+                </div>
+                <button class="btn btn-primary" onclick="loadWrongAnswerWeek()">불러오기</button>
+            </div>
+
+            <div class="stats" id="tab7Stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="tab7TotalCount">0</div>
+                    <div class="stat-label">영어 학생</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="tab7AssignedCount">0</div>
+                    <div class="stat-label">오답 등록</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="tab7CheckedCount">0</div>
+                    <div class="stat-label">배부 완료</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <input type="text" class="search-box" id="tab7SearchInput" placeholder="이름, 반으로 검색...">
+                <div class="filter-buttons">
+                    <button class="btn btn-primary" onclick="filterGradeTab7('all')">전체</button>
+                    <button class="btn btn-secondary" onclick="filterGradeTab7(1)">1학년</button>
+                    <button class="btn btn-secondary" onclick="filterGradeTab7(2)">2학년</button>
+                    <select id="tab7ClassFilter" class="search-box" onchange="filterByClassTab7()" style="max-width:120px;">
+                        <option value="all">모든 반</option>
+                    </select>
+                </div>
+                <div class="filter-buttons">
+                    <button class="btn btn-primary" onclick="toggleWrongAnswerEditMode(event)">편집</button>
+                    <button class="btn btn-success" onclick="wrongAnswerCheckAll()">전체 체크</button>
+                    <button class="btn btn-secondary" onclick="wrongAnswerUncheckAll()">전체 해제</button>
+                </div>
+            </div>
+
+            <div class="grade-section" id="tab7Grade1Section">
+                <div class="grade-header">
+                    <span>1학년</span>
+                    <span id="tab7Grade1Stats">0명</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">#</th>
+                                <th style="width:60px;">이름</th>
+                                <th style="width:50px;">반</th>
+                                <th>오답 문제</th>
+                                <th style="width:50px;">배부</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tab7Grade1Body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grade-section" id="tab7Grade2Section">
+                <div class="grade-header">
+                    <span>2학년</span>
+                    <span id="tab7Grade2Stats">0명</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">#</th>
+                                <th style="width:60px;">이름</th>
+                                <th style="width:50px;">반</th>
+                                <th>오답 문제</th>
+                                <th style="width:50px;">배부</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tab7Grade2Body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ==================== 탭 4: 학부모 조회 ==================== -->
         <div class="tab-content" id="tab-4">
             <div class="management-card">
@@ -1874,6 +2181,87 @@
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeAddStudentModal()">취소</button>
                     <button type="submit" class="btn btn-success">추가</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="waitlistModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeWaitlistModal()">&times;</span>
+            <div class="modal-header" id="waitlistModalTitle">예약대기 추가</div>
+            <form id="waitlistForm" onsubmit="saveWaitlistEntry(event)">
+                <input type="hidden" id="waitlistId">
+                <div class="form-group">
+                    <label for="waitlistName">이름 *</label>
+                    <input type="text" id="waitlistName" required>
+                </div>
+                <div class="form-group">
+                    <label for="waitlistGrade">학년 *</label>
+                    <select id="waitlistGrade" required>
+                        <option value="">선택하세요</option>
+                        <option value="1">1학년</option>
+                        <option value="2">2학년</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="waitlistClass">반 *</label>
+                    <input type="text" id="waitlistClass" placeholder="예: 1반" required>
+                </div>
+                <div class="form-group">
+                    <label for="waitlistSubjects">신청 과목 *</label>
+                    <input type="text" id="waitlistSubjects" placeholder="쉼표로 구분" required>
+                </div>
+                <div class="form-group">
+                    <label for="waitlistDelivery">수령 방식</label>
+                    <select id="waitlistDelivery">
+                        <option value="">선택 안함</option>
+                        <option value="픽업">픽업</option>
+                        <option value="택배">택배</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="waitlistPhone">학생 전화번호</label>
+                    <input type="tel" id="waitlistPhone" placeholder="010-xxxx-xxxx">
+                </div>
+                <div class="form-group">
+                    <label for="waitlistParentPhone">학부모 전화번호</label>
+                    <input type="text" id="waitlistParentPhone" placeholder="010-xxxx-xxxx, 010-yyyy-yyyy">
+                </div>
+                <div class="form-group">
+                    <label for="waitlistNote">메모</label>
+                    <input type="text" id="waitlistNote" placeholder="예: 3월 31일 이후 가능">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeWaitlistModal()">취소</button>
+                    <button type="submit" class="btn btn-success">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="pickupScheduleModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closePickupScheduleModal()">&times;</span>
+            <div class="modal-header">픽업 일정 입력</div>
+            <form id="pickupScheduleForm" onsubmit="savePickupSchedule(event)">
+                <input type="hidden" id="pickupStudentId">
+                <div class="form-group">
+                    <label for="pickupDateInput">픽업 날짜</label>
+                    <input type="date" id="pickupDateInput">
+                </div>
+                <div class="form-group">
+                    <label for="pickupTimeInput">픽업 시간</label>
+                    <input type="text" id="pickupTimeInput" placeholder="예: 17:30 또는 오후 5시">
+                </div>
+                <div class="form-group">
+                    <label for="pickupNoteInput">메모</label>
+                    <input type="text" id="pickupNoteInput" placeholder="예: 어머니 방문 예정">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="clearPickupSchedule()">일정 비우기</button>
+                    <button type="button" class="btn btn-secondary" onclick="closePickupScheduleModal()">취소</button>
+                    <button type="submit" class="btn btn-success">저장</button>
                 </div>
             </form>
         </div>
@@ -2064,6 +2452,7 @@
 
         // 현재 작업중인 학생 배열
         const students = [];
+        const waitlist = [];
 
         let currentWeek = '';
         let checkedStudents = {};
@@ -2082,6 +2471,11 @@
         let pendingExcelStudents = [];
         let pendingExcelUpdates = [];
 
+        // 영어 오답 관리
+        let wrongAnswerData = {};
+        let wrongAnswerWeek = '';
+        let wrongAnswerEditMode = false;
+
         const defaultSubjectPool = [
             '국어', '영어', '수학', '과학', '사회', '한국사',
             '윤리', '물리', '화학', '생명과학', '지구과학',
@@ -2091,7 +2485,7 @@
 
         // ==================== 탭 전환 ====================
         // 탭 버튼 순서와 탭 ID 매핑
-        const tabButtonOrder = [1, 2, 5, 3, 4];
+        const tabButtonOrder = [1, 2, 5, 6, 7, 3, 4];
 
         function switchTab(tabId, silent = false) {
             if (!isAdmin && tabId === 4) {
@@ -2124,6 +2518,10 @@
                 renderParentView();
             } else if (tabId === 5) {
                 renderTab5();
+            } else if (tabId === 6) {
+                renderTab6();
+            } else if (tabId === 7) {
+                renderTab7();
             }
         }
 
@@ -2134,9 +2532,12 @@
             const year = now.getFullYear();
             document.getElementById('weekSelect').value = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
             document.getElementById('parentWeekSelect').value = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+            document.getElementById('waWeekSelect').value = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+            wrongAnswerWeek = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
 
             loadStudentsData(() => {
                 loadWeekData();
+                loadWrongAnswerData();
             });
 
             document.getElementById('searchInput').addEventListener('input', searchStudents);
@@ -2144,6 +2545,7 @@
             document.getElementById('tab3SearchInput').addEventListener('input', searchStudentsTab3);
             document.getElementById('tab3CodeFilter').addEventListener('change', searchStudentsTab3);
             document.getElementById('subjectPickerSearch').addEventListener('input', filterSubjectPickerList);
+            document.getElementById('tab7SearchInput').addEventListener('input', searchStudentsTab7);
 
             // 엑셀 업로드 이벤트
             setupExcelUpload();
@@ -2168,8 +2570,23 @@
                         renderStudents();
                         if (currentTab === 2) renderTab2();
                         if (currentTab === 3) renderTab3();
+                        if (currentTab === 5) renderTab5();
+                        if (currentTab === 6) renderTab6();
+                        if (currentTab === 7) renderTab7();
                         console.log("🔄 실시간 동기화: 학생 데이터 업데이트됨");
                     }
+                }
+            });
+
+            database.ref('waitlist').on('value', (snapshot) => {
+                const savedData = snapshot.val();
+                const normalized = Array.isArray(savedData) ? savedData : [];
+                if (JSON.stringify(waitlist) !== JSON.stringify(normalized)) {
+                    waitlist.length = 0;
+                    waitlist.push(...normalized);
+                    normalizeWaitlist();
+                    if (currentTab === 6) renderTab6();
+                    console.log("🔄 실시간 동기화: 예약대기 데이터 업데이트됨");
                 }
             });
 
@@ -2182,6 +2599,15 @@
                         renderStudents();
                         console.log("🔄 실시간 동기화: 체크 데이터 업데이트됨");
                     }
+                }
+            });
+
+            database.ref('wrongAnswerData').on('value', (snapshot) => {
+                const savedData = snapshot.val();
+                if (savedData && JSON.stringify(wrongAnswerData) !== JSON.stringify(savedData)) {
+                    wrongAnswerData = savedData;
+                    if (currentTab === 7) renderTab7();
+                    console.log("🔄 실시간 동기화: 오답 데이터 업데이트됨");
                 }
             });
 
@@ -2396,6 +2822,7 @@
                         if (checkedSnap.val()) {
                             parentCheckedByStudent[studentId] = checkedSnap.val();
                         }
+                        normalizeStudentPickupFields(student);
                         document.getElementById('parentViewStatus').textContent = '조회 완료';
                         renderParentView();
                     });
@@ -2449,6 +2876,7 @@
                 card.innerHTML = `
                     <strong>${student.name}</strong> (${student.grade}학년 ${student.class})<br>
                     <span style="color:#666; font-size:13px;">수령 방식: ${student.deliveryType || '-'}</span>
+                    ${renderParentPickupSchedule(student)}
                     <div class="parent-subjects">${subjectsHtml || '<span style="color:#999;">과목 없음</span>'}</div>
                 `;
 
@@ -2462,6 +2890,7 @@
             let changed = false;
             const existingCodes = new Set(students.map(s => s.accessCode).filter(Boolean));
             students.forEach(s => {
+                normalizeStudentPickupFields(s);
                 if (s.cashReceipt === undefined) {
                     s.cashReceipt = false;
                     changed = true;
@@ -2530,6 +2959,62 @@
             return changed;
         }
 
+        function normalizeStudentPickupFields(student) {
+            if (!student) return false;
+            let changed = false;
+            if (student.pickupDate === undefined) {
+                student.pickupDate = '';
+                changed = true;
+            }
+            if (student.pickupTime === undefined) {
+                student.pickupTime = '';
+                changed = true;
+            }
+            if (student.pickupNote === undefined) {
+                student.pickupNote = '';
+                changed = true;
+            }
+            return changed;
+        }
+
+        function normalizeWaitlist() {
+            let changed = false;
+            waitlist.forEach(entry => {
+                if (!entry.id) {
+                    entry.id = generateStudentId();
+                    changed = true;
+                }
+                if (!entry.createdAt) {
+                    entry.createdAt = new Date().toISOString();
+                    changed = true;
+                }
+                if (!Array.isArray(entry.subjects)) {
+                    entry.subjects = [];
+                    changed = true;
+                }
+                entry.deliveryType = normalizeDeliveryType(entry.deliveryType);
+                entry.phone = normalizePhone(entry.phone) || '';
+                if (entry.parentPhone) {
+                    entry.parentPhone = normalizePhone(entry.parentPhone);
+                }
+                const parsedParents = parseParentPhones((entry.parentPhones || []).join(', ') || entry.parentPhone || '');
+                entry.parentPhones = parsedParents.phones;
+                entry.parentPhoneKeys = parsedParents.keys;
+                entry.parentPhone = parsedParents.phones[0] || '';
+                if (entry.waitlistNote === undefined) {
+                    entry.waitlistNote = '';
+                    changed = true;
+                }
+                if (!entry.class) {
+                    entry.class = '';
+                }
+                if (!entry.grade) {
+                    entry.grade = 1;
+                }
+            });
+            return changed;
+        }
+
         function normalizePhoneDigits(raw) {
             if (!raw) return '';
             const digits = String(raw).replace(/\D/g, '');
@@ -2572,6 +3057,33 @@
             const m = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
             return `${y}-${m}-${day}`;
+        }
+
+        function hasPickupSchedule(student) {
+            return Boolean(student && (student.pickupDate || student.pickupTime || student.pickupNote));
+        }
+
+        function formatPickupSchedule(student) {
+            if (!student) return '';
+            const parts = [];
+            if (student.pickupDate) parts.push(student.pickupDate);
+            if (student.pickupTime) parts.push(student.pickupTime);
+            if (student.pickupNote) parts.push(student.pickupNote);
+            return parts.join(' / ');
+        }
+
+        function renderParentPickupSchedule(student) {
+            if (!student || student.deliveryType !== '픽업' || !hasPickupSchedule(student)) {
+                return '';
+            }
+            const dateLine = student.pickupDate ? `픽업 예정일: ${student.pickupDate}` : '';
+            const timeLine = student.pickupTime ? `픽업 예정 시간: ${student.pickupTime}` : '';
+            const noteLine = student.pickupNote ? `메모: ${student.pickupNote}` : '';
+            return `
+                <div style="margin-top:6px; color:#2b6cb0; font-size:13px;">
+                    ${[dateLine, timeLine, noteLine].filter(Boolean).join('<br>')}
+                </div>
+            `;
         }
 
         let ACCESS_CODE_TTL_DAYS = 30;
@@ -3198,6 +3710,7 @@
             saveStudentsData();
             el.textContent = student.deliveryType || '-';
             if (currentTab === 5) renderTab5();
+            if (currentTab === 6) renderTab6();
             updateSubjectOverview();
         }
 
@@ -3589,6 +4102,7 @@
             saveStudentsData();
             renderStudents();
             if (currentTab === 3) renderTab3();
+            if (currentTab === 6) renderTab6();
             showSaveIndicator();
             closeSubjectPicker();
         }
@@ -3746,6 +4260,7 @@
                 renderTab2();
                 renderTab3();
                 if (currentTab === 5) renderTab5();
+                if (currentTab === 6) renderTab6();
                 showSaveIndicator();
             };
 
@@ -3807,6 +4322,7 @@
                     renderTab2();
                     renderTab3();
                     if (currentTab === 5) renderTab5();
+                    if (currentTab === 6) renderTab6();
                     updateClassFilter();
                 }
             };
@@ -3867,6 +4383,7 @@
             renderTab2();
             renderTab3();
             if (currentTab === 5) renderTab5();
+            if (currentTab === 6) renderTab6();
             updateClassFilter();
         }
 
@@ -4217,6 +4734,101 @@
             document.getElementById('tab5PickupCount').textContent = pickupStudents.length;
             document.getElementById('tab5ShippingPaid').textContent = `${shippingPaid}/${deliveryStudents.length}`;
             document.getElementById('tab5ShippingUnpaid').textContent = shippingUnpaid;
+        }
+
+        function renderTab6() {
+            const scheduledBody = document.getElementById('tab6PickupScheduledBody');
+            const unscheduledBody = document.getElementById('tab6PickupUnscheduledBody');
+            const waitlistBody = document.getElementById('tab6WaitlistBody');
+            scheduledBody.innerHTML = '';
+            unscheduledBody.innerHTML = '';
+            waitlistBody.innerHTML = '';
+
+            const pickupStudents = getSortedStudents().filter(student => student.deliveryType === '픽업');
+            const scheduled = pickupStudents.filter(hasPickupSchedule).sort(comparePickupSchedule);
+            const unscheduled = pickupStudents.filter(student => !hasPickupSchedule(student));
+
+            scheduled.forEach((student, index) => {
+                scheduledBody.appendChild(createPickupScheduleRow(student, index + 1, true));
+            });
+            unscheduled.forEach((student, index) => {
+                unscheduledBody.appendChild(createPickupScheduleRow(student, index + 1, false));
+            });
+
+            const sortedWaitlist = [...waitlist].sort((a, b) => {
+                const timeA = new Date(a.createdAt || 0).getTime();
+                const timeB = new Date(b.createdAt || 0).getTime();
+                return timeB - timeA;
+            });
+            sortedWaitlist.forEach((entry, index) => {
+                waitlistBody.appendChild(createWaitlistRow(entry, index + 1));
+            });
+
+            document.getElementById('tab6PickupTotal').textContent = pickupStudents.length;
+            document.getElementById('tab6PickupScheduled').textContent = scheduled.length;
+            document.getElementById('tab6PickupUnscheduled').textContent = unscheduled.length;
+            document.getElementById('tab6WaitlistCount').textContent = waitlist.length;
+            document.getElementById('tab6PickupScheduledStats').textContent = `${scheduled.length}명`;
+            document.getElementById('tab6PickupUnscheduledStats').textContent = `${unscheduled.length}명`;
+            document.getElementById('tab6WaitlistStats').textContent = `${waitlist.length}명`;
+        }
+
+        function comparePickupSchedule(a, b) {
+            const dateA = a.pickupDate || '9999-12-31';
+            const dateB = b.pickupDate || '9999-12-31';
+            if (dateA !== dateB) return dateA.localeCompare(dateB);
+            const timeA = a.pickupTime || '99:99';
+            const timeB = b.pickupTime || '99:99';
+            if (timeA !== timeB) return timeA.localeCompare(timeB);
+            return a.name.localeCompare(b.name, 'ko');
+        }
+
+        function createPickupScheduleRow(student, rowIndex, scheduled) {
+            const tr = document.createElement('tr');
+            const subjectsHtml = (student.subjects || []).map(subj => `<span class="subject-tag">${subj}</span>`).join('');
+            tr.innerHTML = scheduled ? `
+                <td>${rowIndex}</td>
+                <td class="student-name">${student.name}</td>
+                <td>${student.grade}학년</td>
+                <td>${student.class}</td>
+                <td><div class="subjects">${subjectsHtml || '<span style="color:#999;">과목 없음</span>'}</div></td>
+                <td><div class="schedule-summary">${formatPickupSchedule(student)}</div></td>
+                <td class="phone">${getStudentParentPhonesDisplay(student)}</td>
+                <td><div class="inline-actions"><button type="button" class="btn btn-secondary" onclick="openPickupScheduleModal(${JSON.stringify(student.id)})">수정</button></div></td>
+            ` : `
+                <td>${rowIndex}</td>
+                <td class="student-name">${student.name}</td>
+                <td>${student.grade}학년</td>
+                <td>${student.class}</td>
+                <td><div class="subjects">${subjectsHtml || '<span style="color:#999;">과목 없음</span>'}</div></td>
+                <td class="phone">${getStudentParentPhonesDisplay(student)}</td>
+                <td><div class="inline-actions"><button type="button" class="btn btn-primary" onclick="openPickupScheduleModal(${JSON.stringify(student.id)})">일정 입력</button></div></td>
+            `;
+            return tr;
+        }
+
+        function createWaitlistRow(entry, rowIndex) {
+            const tr = document.createElement('tr');
+            const subjectsHtml = (entry.subjects || []).map(subj => `<span class="subject-tag">${subj}</span>`).join('');
+            tr.innerHTML = `
+                <td>${rowIndex}</td>
+                <td class="student-name">${entry.name || '-'}</td>
+                <td>${entry.grade || '-'}학년</td>
+                <td>${entry.class || '-'}</td>
+                <td><div class="subjects">${subjectsHtml || '<span style="color:#999;">과목 없음</span>'}</div></td>
+                <td>${entry.deliveryType || '-'}</td>
+                <td>${entry.waitlistNote || '-'}</td>
+                <td class="phone">${[entry.phone || '', getStudentParentPhonesDisplay(entry)].filter(v => v && v !== '-').join(' / ') || '-'}</td>
+                <td>${entry.createdAt ? formatDateShort(entry.createdAt) : '-'}</td>
+                <td>
+                    <div class="inline-actions">
+                        <button type="button" class="btn btn-secondary" onclick="openWaitlistModal(${JSON.stringify(entry.id)})">수정</button>
+                        <button type="button" class="btn btn-success" onclick="promoteWaitlistEntry(${JSON.stringify(entry.id)})">확정 이동</button>
+                        <button type="button" class="btn btn-danger" onclick="deleteWaitlistEntry(${JSON.stringify(entry.id)})">삭제</button>
+                    </div>
+                </td>
+            `;
+            return tr;
         }
 
         function searchStudentsTab3() {
@@ -4624,7 +5236,10 @@
                                 paymentConfirmed: candidate.paymentConfirmed === null ? false : candidate.paymentConfirmed,
                                 paymentAmount: candidate.paymentAmount === null ? 0 : candidate.paymentAmount,
                                 unpaidAmount: candidate.unpaidAmount === null ? 0 : candidate.unpaidAmount,
-                                paymentStatus: candidate.paymentStatus === null ? '' : candidate.paymentStatus
+                                paymentStatus: candidate.paymentStatus === null ? '' : candidate.paymentStatus,
+                                pickupDate: '',
+                                pickupTime: '',
+                                pickupNote: ''
                             });
                         }
                     });
@@ -4825,6 +5440,8 @@
             renderStudents();
             renderTab2();
             renderTab3();
+            renderTab5();
+            renderTab6();
             showSaveIndicator();
 
             let msg = '';
@@ -4866,7 +5483,31 @@
                     accessCodeCreatedAt: s.accessCodeCreatedAt || '',
                     paymentAmount: s.paymentAmount || 0,
                     unpaidAmount: s.unpaidAmount || 0,
-                    paymentStatus: s.paymentStatus || ''
+                    paymentStatus: s.paymentStatus || '',
+                    pickupDate: s.pickupDate || '',
+                    pickupTime: s.pickupTime || '',
+                    pickupNote: s.pickupNote || ''
+                };
+            });
+            return map;
+        }
+
+        function buildWaitlistById() {
+            const map = {};
+            waitlist.forEach(entry => {
+                map[entry.id] = {
+                    id: entry.id,
+                    createdAt: entry.createdAt || '',
+                    name: entry.name || '',
+                    grade: entry.grade || 1,
+                    class: entry.class || '',
+                    subjects: entry.subjects || [],
+                    phone: entry.phone || '',
+                    parentPhone: entry.parentPhone || '',
+                    parentPhones: entry.parentPhones || [],
+                    parentPhoneKeys: entry.parentPhoneKeys || [],
+                    deliveryType: entry.deliveryType || '',
+                    waitlistNote: entry.waitlistNote || ''
                 };
             });
             return map;
@@ -4900,16 +5541,21 @@
                 const codeIndex = buildCodeIndex();
                 Promise.all([
                     database.ref('students').set(students),
+                    database.ref('waitlist').set(waitlist),
+                    database.ref('waitlistById').set(buildWaitlistById()),
                     database.ref('studentsById').set(studentsById),
                     database.ref('codeIndex').set(codeIndex)
                 ])
                 .catch((error) => {
                     console.error("❌ Firebase 저장 실패:", error);
                     localStorage.setItem('studentsData', JSON.stringify(students));
+                    localStorage.setItem('waitlistData', JSON.stringify(waitlist));
                 });
             } else {
                 localStorage.setItem('studentsData', JSON.stringify(students));
+                localStorage.setItem('waitlistData', JSON.stringify(waitlist));
                 localStorage.setItem('studentsById', JSON.stringify(buildStudentsById()));
+                localStorage.setItem('waitlistById', JSON.stringify(buildWaitlistById()));
                 localStorage.setItem('codeIndex', JSON.stringify(buildCodeIndex()));
             }
         }
@@ -4917,14 +5563,18 @@
         function loadStudentsData(onLoaded) {
             if (useFirebase && database && !isAdmin) {
                 students.length = 0;
+                waitlist.length = 0;
                 checkedStudents = {};
                 renderStudents();
                 if (typeof onLoaded === 'function') onLoaded();
                 return;
             }
             if (useFirebase && database) {
-                database.ref('students').once('value')
-                    .then((snapshot) => {
+                Promise.all([
+                    database.ref('students').once('value'),
+                    database.ref('waitlist').once('value')
+                ])
+                    .then(([snapshot, waitlistSnapshot]) => {
                         const savedData = snapshot.val();
                         if (savedData && Array.isArray(savedData)) {
                             students.length = 0;
@@ -4941,8 +5591,11 @@
                             normalizeStudentPhones();
                             ensureStudentIds();
                             removeDuplicateStudents();
-                            saveStudentsData();
                         }
+                        waitlist.length = 0;
+                        waitlist.push(...(Array.isArray(waitlistSnapshot.val()) ? waitlistSnapshot.val() : []));
+                        const waitlistChanged = normalizeWaitlist();
+                        if (!savedData || !Array.isArray(savedData) || waitlistChanged) saveStudentsData();
                         renderStudents();
                         if (typeof onLoaded === 'function') onLoaded();
                     })
@@ -4976,6 +5629,12 @@
                 ensureStudentIds();
                 removeDuplicateStudents();
             }
+            const savedWaitlist = localStorage.getItem('waitlistData');
+            waitlist.length = 0;
+            if (savedWaitlist) {
+                waitlist.push(...JSON.parse(savedWaitlist));
+            }
+            if (normalizeWaitlist()) saveStudentsData();
         }
 
         function resetToDefaultStudents() {
@@ -4988,11 +5647,14 @@
             ensureNewFields();
             normalizeStudentPhones();
             ensureStudentIds();
+            waitlist.length = 0;
 
             if (useFirebase && database) {
                 const studentsById = buildStudentsById();
                 Promise.all([
                     database.ref('students').set(students),
+                    database.ref('waitlist').set(waitlist),
+                    database.ref('waitlistById').set({}),
                     database.ref('studentsById').set(studentsById),
                     database.ref('codeIndex').set(buildCodeIndex())
                 ])
@@ -5006,7 +5668,9 @@
                     });
             } else {
                 localStorage.removeItem('studentsData');
+                localStorage.removeItem('waitlistData');
                 localStorage.setItem('studentsById', JSON.stringify(buildStudentsById()));
+                localStorage.setItem('waitlistById', JSON.stringify(buildWaitlistById()));
                 localStorage.setItem('codeIndex', JSON.stringify(buildCodeIndex()));
                 alert('학생 데이터가 초기값으로 리셋되었습니다!');
                 showSaveIndicator();
@@ -5016,6 +5680,8 @@
             updateStats();
             if (currentTab === 2) renderTab2();
             if (currentTab === 3) renderTab3();
+            if (currentTab === 5) renderTab5();
+            if (currentTab === 6) renderTab6();
         }
 
         function clearAllStudents() {
@@ -5024,11 +5690,14 @@
             }
 
             students.length = 0;
+            waitlist.length = 0;
             checkedStudents = {};
 
             if (useFirebase && database) {
                 Promise.all([
                     database.ref('students').set(students),
+                    database.ref('waitlist').set(waitlist),
+                    database.ref('waitlistById').set({}),
                     database.ref('studentsById').set({}),
                     database.ref('codeIndex').set({}),
                     database.ref('checkedStudents').set(checkedStudents),
@@ -5044,8 +5713,10 @@
                 });
             } else {
                 localStorage.removeItem('studentsData');
+                localStorage.removeItem('waitlistData');
                 localStorage.removeItem('studentChecklist');
                 localStorage.removeItem('studentsById');
+                localStorage.removeItem('waitlistById');
                 localStorage.removeItem('codeIndex');
                 alert('모든 학생 데이터가 삭제되었습니다.');
                 showSaveIndicator();
@@ -5055,6 +5726,8 @@
             updateStats();
             if (currentTab === 2) renderTab2();
             if (currentTab === 3) renderTab3();
+            if (currentTab === 5) renderTab5();
+            if (currentTab === 6) renderTab6();
         }
 
         function cleanupDuplicateStudentsNow() {
@@ -5069,6 +5742,8 @@
             updateStats();
             if (currentTab === 2) renderTab2();
             if (currentTab === 3) renderTab3();
+            if (currentTab === 5) renderTab5();
+            if (currentTab === 6) renderTab6();
             showSaveIndicator();
             alert(`중복 학생 ${removedCount}명이 병합 정리되었습니다.`);
         }
@@ -5083,14 +5758,196 @@
             document.getElementById('addStudentForm').reset();
         }
 
+        function openWaitlistModal(waitlistId = '') {
+            const modal = document.getElementById('waitlistModal');
+            const form = document.getElementById('waitlistForm');
+            form.reset();
+            document.getElementById('waitlistId').value = '';
+            document.getElementById('waitlistModalTitle').textContent = '예약대기 추가';
+
+            if (waitlistId) {
+                const entry = waitlist.find(item => item.id === waitlistId);
+                if (entry) {
+                    document.getElementById('waitlistId').value = entry.id;
+                    document.getElementById('waitlistModalTitle').textContent = '예약대기 수정';
+                    document.getElementById('waitlistName').value = entry.name || '';
+                    document.getElementById('waitlistGrade').value = String(entry.grade || '');
+                    document.getElementById('waitlistClass').value = entry.class || '';
+                    document.getElementById('waitlistSubjects').value = (entry.subjects || []).join(', ');
+                    document.getElementById('waitlistDelivery').value = entry.deliveryType || '';
+                    document.getElementById('waitlistPhone').value = entry.phone || '';
+                    document.getElementById('waitlistParentPhone').value = (entry.parentPhones || []).join(', ');
+                    document.getElementById('waitlistNote').value = entry.waitlistNote || '';
+                }
+            }
+
+            modal.style.display = 'block';
+        }
+
+        function closeWaitlistModal() {
+            document.getElementById('waitlistModal').style.display = 'none';
+            document.getElementById('waitlistForm').reset();
+            document.getElementById('waitlistId').value = '';
+        }
+
+        function saveWaitlistEntry(event) {
+            event.preventDefault();
+
+            const waitlistId = document.getElementById('waitlistId').value.trim();
+            const parsedParents = parseParentPhones(document.getElementById('waitlistParentPhone').value.trim());
+            const payload = {
+                id: waitlistId || generateStudentId(),
+                createdAt: new Date().toISOString(),
+                name: document.getElementById('waitlistName').value.trim(),
+                grade: parseInt(document.getElementById('waitlistGrade').value, 10),
+                class: document.getElementById('waitlistClass').value.trim(),
+                subjects: document.getElementById('waitlistSubjects').value.split(',').map(v => v.trim()).filter(Boolean),
+                deliveryType: normalizeDeliveryType(document.getElementById('waitlistDelivery').value.trim()),
+                phone: normalizePhone(document.getElementById('waitlistPhone').value.trim()) || '',
+                parentPhone: parsedParents.phones[0] || '',
+                parentPhones: parsedParents.phones,
+                parentPhoneKeys: parsedParents.keys,
+                waitlistNote: document.getElementById('waitlistNote').value.trim()
+            };
+
+            if (waitlistId) {
+                const existing = waitlist.find(entry => entry.id === waitlistId);
+                if (existing) {
+                    payload.createdAt = existing.createdAt || payload.createdAt;
+                    Object.assign(existing, payload);
+                }
+            } else {
+                waitlist.push(payload);
+            }
+
+            normalizeWaitlist();
+            saveStudentsData();
+            if (currentTab === 6) renderTab6();
+            closeWaitlistModal();
+            showSaveIndicator();
+        }
+
+        function deleteWaitlistEntry(waitlistId) {
+            const index = waitlist.findIndex(entry => entry.id === waitlistId);
+            if (index === -1) return;
+            if (!confirm('이 예약대기 항목을 삭제하시겠습니까?')) return;
+            waitlist.splice(index, 1);
+            saveStudentsData();
+            if (currentTab === 6) renderTab6();
+            showSaveIndicator();
+        }
+
+        function promoteWaitlistEntry(waitlistId) {
+            const index = waitlist.findIndex(entry => entry.id === waitlistId);
+            if (index === -1) return;
+            const entry = waitlist[index];
+            const existingCodes = new Set(students.map(s => s.accessCode).filter(Boolean));
+            const sameGradeStudents = students.filter(s => s.grade === entry.grade);
+            const nextNum = sameGradeStudents.length > 0
+                ? Math.max(...sameGradeStudents.map(s => parseStudentNum(s.num) || 0)) + 1
+                : 1;
+
+            students.push({
+                id: generateStudentId(),
+                grade: entry.grade,
+                num: nextNum,
+                name: entry.name,
+                class: entry.class,
+                subjects: [...(entry.subjects || [])],
+                phone: entry.phone || '',
+                parentPhone: entry.parentPhone || '',
+                parentPhones: [...(entry.parentPhones || [])],
+                parentPhoneKeys: [...(entry.parentPhoneKeys || [])],
+                accessCode: generateAccessCode(existingCodes),
+                accessCodeCreatedAt: new Date().toISOString(),
+                deliveryType: entry.deliveryType || '',
+                cashReceipt: false,
+                mobileUrl: false,
+                paymentConfirmed: false,
+                paymentAmount: 0,
+                unpaidAmount: 0,
+                paymentStatus: '',
+                pickupDate: '',
+                pickupTime: '',
+                pickupNote: entry.waitlistNote || ''
+            });
+
+            waitlist.splice(index, 1);
+            students.sort((a, b) => {
+                if (a.grade !== b.grade) return a.grade - b.grade;
+                return (parseStudentNum(a.num) || 0) - (parseStudentNum(b.num) || 0);
+            });
+            saveStudentsData();
+            renderStudents();
+            renderTab2();
+            renderTab3();
+            renderTab5();
+            renderTab6();
+            showSaveIndicator();
+        }
+
+        function openPickupScheduleModal(studentId) {
+            const student = getStudentById(studentId);
+            if (!student) return;
+            document.getElementById('pickupStudentId').value = studentId;
+            document.getElementById('pickupDateInput').value = student.pickupDate || '';
+            document.getElementById('pickupTimeInput').value = student.pickupTime || '';
+            document.getElementById('pickupNoteInput').value = student.pickupNote || '';
+            document.getElementById('pickupScheduleModal').style.display = 'block';
+        }
+
+        function closePickupScheduleModal() {
+            document.getElementById('pickupScheduleModal').style.display = 'none';
+            document.getElementById('pickupScheduleForm').reset();
+            document.getElementById('pickupStudentId').value = '';
+        }
+
+        function savePickupSchedule(event) {
+            event.preventDefault();
+            const studentId = document.getElementById('pickupStudentId').value;
+            const student = getStudentById(studentId);
+            if (!student) return;
+            student.pickupDate = document.getElementById('pickupDateInput').value;
+            student.pickupTime = document.getElementById('pickupTimeInput').value.trim();
+            student.pickupNote = document.getElementById('pickupNoteInput').value.trim();
+            saveStudentsData();
+            if (currentTab === 6) renderTab6();
+            closePickupScheduleModal();
+            showSaveIndicator();
+        }
+
+        function clearPickupSchedule() {
+            const studentId = document.getElementById('pickupStudentId').value;
+            const student = getStudentById(studentId);
+            if (!student) {
+                closePickupScheduleModal();
+                return;
+            }
+            student.pickupDate = '';
+            student.pickupTime = '';
+            student.pickupNote = '';
+            saveStudentsData();
+            if (currentTab === 6) renderTab6();
+            closePickupScheduleModal();
+            showSaveIndicator();
+        }
+
         window.onclick = function(event) {
             const addStudentModal = document.getElementById('addStudentModal');
+            const waitlistModal = document.getElementById('waitlistModal');
+            const pickupScheduleModal = document.getElementById('pickupScheduleModal');
             const bulkSMSModal = document.getElementById('bulkSMSModal');
             const smsModal = document.getElementById('smsModal');
             const subjectPickerModal = document.getElementById('subjectPickerModal');
 
             if (event.target === addStudentModal) {
                 closeAddStudentModal();
+            }
+            if (event.target === waitlistModal) {
+                closeWaitlistModal();
+            }
+            if (event.target === pickupScheduleModal) {
+                closePickupScheduleModal();
             }
             if (event.target === bulkSMSModal) {
                 closeBulkSMSModal();
@@ -5150,7 +6007,13 @@
                 deliveryType: deliveryType,
                 cashReceipt: false,
                 mobileUrl: false,
-                paymentConfirmed: false
+                paymentConfirmed: false,
+                paymentAmount: 0,
+                unpaidAmount: 0,
+                paymentStatus: '',
+                pickupDate: '',
+                pickupTime: '',
+                pickupNote: ''
             };
 
             students.push(newStudent);
@@ -5165,6 +6028,8 @@
             updateStats();
             if (currentTab === 2) renderTab2();
             if (currentTab === 3) renderTab3();
+            if (currentTab === 5) renderTab5();
+            if (currentTab === 6) renderTab6();
 
             closeAddStudentModal();
             showSaveIndicator();
@@ -5191,13 +6056,15 @@
                 updateStats();
                 if (currentTab === 2) renderTab2();
                 if (currentTab === 3) renderTab3();
+                if (currentTab === 5) renderTab5();
+                if (currentTab === 6) renderTab6();
                 showSaveIndicator();
             }
         }
 
         // ==================== 엑셀 다운로드 ====================
         function downloadExcel() {
-            const headers = ['학년', '번호', '이름', '반', '신청 과목', '수령', '입금액', '택배비 납부', '학생 전화번호', '학부모 전화번호', '접속 코드', '코드 만료일', '현금영수증', '모바일URL', '입금확인'];
+            const headers = ['학년', '번호', '이름', '반', '신청 과목', '수령', '입금액', '택배비 납부', '학생 전화번호', '학부모 전화번호', '접속 코드', '코드 만료일', '현금영수증', '모바일URL', '입금확인', '픽업 날짜', '픽업 시간', '픽업 메모'];
 
             const sortedStudents = getSortedStudents();
 
@@ -5217,7 +6084,10 @@
                     student.accessCodeCreatedAt ? formatDateShort(new Date(new Date(student.accessCodeCreatedAt).getTime() + ACCESS_CODE_TTL_DAYS * 24 * 60 * 60 * 1000)) : '',
                     student.cashReceipt ? 'O' : 'X',
                     student.mobileUrl ? 'O' : 'X',
-                    student.paymentConfirmed ? 'O' : 'X'
+                    student.paymentConfirmed ? 'O' : 'X',
+                    student.pickupDate || '',
+                    student.pickupTime || '',
+                    student.pickupNote || ''
                 ];
             });
 
@@ -5407,6 +6277,265 @@
 
             closeBulkSMSModal();
             window.location.href = smsUrl;
+        }
+        // ==================== 탭 7: 영어 오답 배부 ====================
+
+        function saveWrongAnswerData() {
+            if (useFirebase && database) {
+                database.ref('wrongAnswerData').set(wrongAnswerData)
+                    .catch((error) => {
+                        console.error("❌ Firebase 오답 데이터 저장 실패:", error);
+                        localStorage.setItem('wrongAnswerData', JSON.stringify(wrongAnswerData));
+                    });
+            } else {
+                localStorage.setItem('wrongAnswerData', JSON.stringify(wrongAnswerData));
+            }
+        }
+
+        function loadWrongAnswerData() {
+            if (useFirebase && database) {
+                database.ref('wrongAnswerData').once('value').then((snapshot) => {
+                    const savedData = snapshot.val();
+                    if (savedData) {
+                        wrongAnswerData = savedData;
+                    }
+                    if (currentTab === 7) renderTab7();
+                }).catch(() => {
+                    const saved = localStorage.getItem('wrongAnswerData');
+                    if (saved) wrongAnswerData = JSON.parse(saved);
+                    if (currentTab === 7) renderTab7();
+                });
+            } else {
+                const saved = localStorage.getItem('wrongAnswerData');
+                if (saved) wrongAnswerData = JSON.parse(saved);
+                if (currentTab === 7) renderTab7();
+            }
+        }
+
+        function loadWrongAnswerWeek() {
+            wrongAnswerWeek = document.getElementById('waWeekSelect').value;
+            renderTab7();
+        }
+
+        function getWrongAnswerEntry(subject, week, studentId) {
+            if (!wrongAnswerData[subject]) wrongAnswerData[subject] = {};
+            if (!wrongAnswerData[subject][week]) wrongAnswerData[subject][week] = {};
+            if (!wrongAnswerData[subject][week][studentId]) {
+                wrongAnswerData[subject][week][studentId] = { items: [], checked: false };
+            }
+            return wrongAnswerData[subject][week][studentId];
+        }
+
+        function renderTab7() {
+            const subject = '영어';
+            const week = wrongAnswerWeek;
+            if (!week) return;
+
+            const grade1Body = document.getElementById('tab7Grade1Body');
+            const grade2Body = document.getElementById('tab7Grade2Body');
+            grade1Body.innerHTML = '';
+            grade2Body.innerHTML = '';
+
+            const englishStudents = getSortedStudents().filter(s =>
+                Array.isArray(s.subjects) && s.subjects.includes(subject)
+            );
+
+            let grade1Idx = 0, grade2Idx = 0;
+            let totalAssigned = 0, totalChecked = 0;
+
+            englishStudents.forEach(student => {
+                const entry = getWrongAnswerEntry(subject, week, student.id);
+                if (entry.items.length > 0) totalAssigned++;
+                if (entry.checked) totalChecked++;
+
+                const tr = createTab7Row(student, entry, student.grade === 1 ? ++grade1Idx : ++grade2Idx);
+                if (student.grade === 1) {
+                    grade1Body.appendChild(tr);
+                } else {
+                    grade2Body.appendChild(tr);
+                }
+            });
+
+            document.getElementById('tab7Grade1Stats').textContent = `${grade1Idx}명`;
+            document.getElementById('tab7Grade2Stats').textContent = `${grade2Idx}명`;
+            document.getElementById('tab7TotalCount').textContent = englishStudents.length;
+            document.getElementById('tab7AssignedCount').textContent = totalAssigned;
+            document.getElementById('tab7CheckedCount').textContent = totalChecked;
+
+            updateTab7ClassFilter(englishStudents);
+
+            const wrapper = document.getElementById('tab-7');
+            if (wrongAnswerEditMode) {
+                wrapper.classList.add('wa-edit-mode');
+            } else {
+                wrapper.classList.remove('wa-edit-mode');
+            }
+        }
+
+        function createTab7Row(student, entry, rowIndex) {
+            const tr = document.createElement('tr');
+            tr.dataset.grade = student.grade;
+            tr.dataset.class = student.class;
+            tr.dataset.name = student.name;
+            if (entry.checked) {
+                tr.style.background = '#f0faf0';
+            }
+
+            const safeId = makeSafeId(student.id);
+
+            let itemsHtml = entry.items.map((item, idx) =>
+                `<span class="wa-tag" onclick="removeWrongAnswerItem('${student.id}', ${idx})" title="${wrongAnswerEditMode ? '클릭하여 삭제' : ''}">${item}</span>`
+            ).join('');
+
+            itemsHtml += `<span class="wa-add-btn" onclick="showWrongAnswerInput('${student.id}')">+ 추가</span>`;
+            itemsHtml += `<span id="wa-input-area-${safeId}"></span>`;
+
+            tr.innerHTML = `
+                <td style="text-align:center;">${rowIndex}</td>
+                <td>${student.name}</td>
+                <td>${student.class}</td>
+                <td class="wa-items-cell" id="wa-items-${safeId}">${itemsHtml}</td>
+                <td style="text-align:center;">
+                    <button class="wa-check-btn ${entry.checked ? 'checked' : ''}" onclick="toggleWrongAnswerCheck('${student.id}')">
+                        ${entry.checked ? '✓' : ''}
+                    </button>
+                </td>
+            `;
+            return tr;
+        }
+
+        function showWrongAnswerInput(studentId) {
+            const safeId = makeSafeId(studentId);
+            const area = document.getElementById(`wa-input-area-${safeId}`);
+            if (!area || area.querySelector('.wa-input')) return;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'wa-input';
+            input.placeholder = '오답 문제 입력';
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addWrongAnswerItem(studentId, input.value);
+                }
+            };
+            input.onblur = () => {
+                setTimeout(() => {
+                    if (input.value.trim()) {
+                        addWrongAnswerItem(studentId, input.value);
+                    } else {
+                        renderTab7();
+                    }
+                }, 200);
+            };
+            area.appendChild(input);
+            input.focus();
+        }
+
+        function addWrongAnswerItem(studentId, text) {
+            if (!text || !text.trim()) return;
+            const entry = getWrongAnswerEntry('영어', wrongAnswerWeek, studentId);
+            entry.items.push(text.trim());
+            saveWrongAnswerData();
+            showSaveIndicator();
+            renderTab7();
+        }
+
+        function removeWrongAnswerItem(studentId, index) {
+            if (!wrongAnswerEditMode) return;
+            const entry = getWrongAnswerEntry('영어', wrongAnswerWeek, studentId);
+            if (index >= 0 && index < entry.items.length) {
+                const itemName = entry.items[index];
+                if (confirm(`"${itemName}" 항목을 삭제하시겠습니까?`)) {
+                    entry.items.splice(index, 1);
+                    saveWrongAnswerData();
+                    showSaveIndicator();
+                    renderTab7();
+                }
+            }
+        }
+
+        function toggleWrongAnswerCheck(studentId) {
+            const entry = getWrongAnswerEntry('영어', wrongAnswerWeek, studentId);
+            entry.checked = !entry.checked;
+            saveWrongAnswerData();
+            showSaveIndicator();
+            renderTab7();
+        }
+
+        function toggleWrongAnswerEditMode(e) {
+            wrongAnswerEditMode = !wrongAnswerEditMode;
+            const btn = e && e.target ? e.target : null;
+            if (btn) {
+                btn.textContent = wrongAnswerEditMode ? '편집 완료' : '편집';
+                btn.className = wrongAnswerEditMode ? 'btn btn-success' : 'btn btn-primary';
+            }
+            renderTab7();
+        }
+
+        function wrongAnswerCheckAll() {
+            const subject = '영어';
+            const week = wrongAnswerWeek;
+            const englishStudents = students.filter(s =>
+                Array.isArray(s.subjects) && s.subjects.includes(subject)
+            );
+            englishStudents.forEach(student => {
+                const entry = getWrongAnswerEntry(subject, week, student.id);
+                entry.checked = true;
+            });
+            saveWrongAnswerData();
+            showSaveIndicator();
+            renderTab7();
+        }
+
+        function wrongAnswerUncheckAll() {
+            const subject = '영어';
+            const week = wrongAnswerWeek;
+            const englishStudents = students.filter(s =>
+                Array.isArray(s.subjects) && s.subjects.includes(subject)
+            );
+            englishStudents.forEach(student => {
+                const entry = getWrongAnswerEntry(subject, week, student.id);
+                entry.checked = false;
+            });
+            saveWrongAnswerData();
+            showSaveIndicator();
+            renderTab7();
+        }
+
+        function searchStudentsTab7() {
+            const searchTerm = document.getElementById('tab7SearchInput').value.toLowerCase();
+            document.querySelectorAll('#tab7Grade1Body tr, #tab7Grade2Body tr').forEach(row => {
+                const name = (row.dataset.name || '').toLowerCase();
+                const cls = (row.dataset.class || '').toLowerCase();
+                row.style.display = (!searchTerm || name.includes(searchTerm) || cls.includes(searchTerm)) ? '' : 'none';
+            });
+        }
+
+        function filterGradeTab7(grade) {
+            document.getElementById('tab7Grade1Section').style.display = (grade === 'all' || grade === 1) ? '' : 'none';
+            document.getElementById('tab7Grade2Section').style.display = (grade === 'all' || grade === 2) ? '' : 'none';
+        }
+
+        function updateTab7ClassFilter(englishStudents) {
+            const select = document.getElementById('tab7ClassFilter');
+            const current = select.value;
+            const classes = [...new Set(englishStudents.map(s => s.class))].sort((a, b) => extractClassNumber(a) - extractClassNumber(b));
+            select.innerHTML = '<option value="all">모든 반</option>';
+            classes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                select.appendChild(opt);
+            });
+            select.value = current;
+        }
+
+        function filterByClassTab7() {
+            const selected = document.getElementById('tab7ClassFilter').value;
+            document.querySelectorAll('#tab7Grade1Body tr, #tab7Grade2Body tr').forEach(row => {
+                row.style.display = (selected === 'all' || row.dataset.class === selected) ? '' : 'none';
+            });
         }
     </script>
 </body>

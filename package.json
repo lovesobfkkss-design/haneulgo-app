@@ -1,0 +1,19 @@
+{
+  "name": "student-checklist-tests",
+  "version": "1.0.0",
+  "description": "Automated tests for student material distribution checklist",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:single": "playwright test --grep"
+  },
+  "keywords": ["playwright", "e2e", "testing"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+}

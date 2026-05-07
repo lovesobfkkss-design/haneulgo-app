@@ -77,6 +77,114 @@
             display: block;
         }
 
+        .session-shell {
+            margin-bottom: 20px;
+            border: 1px solid #d9e2ec;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+            padding: 16px;
+        }
+
+        .session-shell-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .session-shell-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f3a5f;
+        }
+
+        .session-shell-subtitle {
+            font-size: 13px;
+            color: #56718f;
+        }
+
+        .session-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .session-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .session-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #48617c;
+            min-width: 42px;
+        }
+
+        .session-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .session-pill {
+            border: 1px solid #c7d6e6;
+            background: white;
+            color: #48617c;
+            border-radius: 999px;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .session-pill:hover {
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .session-pill.active {
+            background: #3498db;
+            border-color: #3498db;
+            color: white;
+        }
+
+        .session-pill.muted {
+            opacity: 0.45;
+        }
+
+        .session-current {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #48617c;
+        }
+
+        .session-empty-state {
+            display: none;
+            border: 1px dashed #bfd3e6;
+            border-radius: 12px;
+            padding: 24px 20px;
+            text-align: center;
+            background: #fafcff;
+            margin-bottom: 20px;
+        }
+
+        .session-empty-state h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .session-empty-state p {
+            color: #6b7c93;
+            margin-bottom: 14px;
+        }
+
         /* ==================== 공통 ==================== */
         .week-info {
             text-align: center;
@@ -1391,7 +1499,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>2026년 1학기 중간고사 - 학생 자료 배부 체크리스트</h1>
+        <h1 id="pageTitle">2026년 1학기 중간고사 - 학생 자료 배부 체크리스트</h1>
 
         <div id="firebaseStatus" class="firebase-status" style="display: none;"></div>
 
@@ -1446,9 +1554,45 @@
                         <button class="btn btn-secondary" type="button" onclick="regenerateExpiredCodes()">만료 코드 재생성</button>
                     </div>
                 </div>
-                <div class="auth-note" style="margin-top:6px;">기존 코드도 기준일로부터 자동 갱신됩니다.</div>
+            <div class="auth-note" style="margin-top:6px;">기존 코드도 기준일로부터 자동 갱신됩니다.</div>
             </div>
 
+        <div class="session-shell">
+            <div class="session-shell-header">
+                <div>
+                    <div class="session-shell-title">시험 회차</div>
+                    <div class="session-shell-subtitle">년도별 → 학기별 → 중간/기말 기준으로 회차를 분리합니다.</div>
+                </div>
+                <button class="btn btn-primary" type="button" onclick="createExamSession()">새 회차 만들기</button>
+            </div>
+            <div class="session-row">
+                <div class="session-group">
+                    <span class="session-label">년도</span>
+                    <div class="session-pills" id="yearTabs"></div>
+                </div>
+            </div>
+            <div class="session-row">
+                <div class="session-group">
+                    <span class="session-label">학기</span>
+                    <div class="session-pills" id="semesterTabs"></div>
+                </div>
+            </div>
+            <div class="session-row">
+                <div class="session-group">
+                    <span class="session-label">구분</span>
+                    <div class="session-pills" id="examTabs"></div>
+                </div>
+            </div>
+            <div class="session-current" id="currentSessionLabel"></div>
+        </div>
+
+        <div id="sessionEmptyState" class="session-empty-state">
+            <h3>선택한 회차가 아직 없습니다.</h3>
+            <p id="sessionEmptyStateText">상단의 새 회차 만들기 버튼으로 회차를 생성한 뒤 학생을 등록하세요.</p>
+            <button class="btn btn-primary" type="button" onclick="createExamSession()">새 회차 만들기</button>
+        </div>
+
+        <div id="mainAppContent">
         <!-- 탭 네비게이션 -->
         <div class="tab-nav">
             <button class="tab-btn active" onclick="switchTab(1)">배부 체크</button>
@@ -2119,6 +2263,7 @@
                 <div id="parentStudentsList"></div>
             </div>
         </div>
+        </div>
     </div>
 
     <div class="save-indicator" id="saveIndicator">
@@ -2396,6 +2541,114 @@
             }
         }
 
+        const SESSION_INDEX_KEY = 'examSessionIndex';
+        const SESSION_SELECTION_KEY = 'selectedExamSession';
+        const LEGACY_SESSION = { year: 2026, semester: '1', examType: 'midterm' };
+        const SEMESTER_OPTIONS = ['1', '2'];
+        const EXAM_TYPE_OPTIONS = ['midterm', 'final'];
+        const EXAM_TYPE_LABELS = {
+            midterm: '중간고사',
+            final: '기말고사'
+        };
+
+        let examSessionIndex = [];
+        let currentSession = { ...LEGACY_SESSION };
+        let activeFirebaseSessionPaths = [];
+
+        function getSessionKey(session = currentSession) {
+            if (!session || !session.year || !session.semester || !session.examType) return '';
+            return `${session.year}-${session.semester}-${session.examType}`;
+        }
+
+        function getSessionLabel(session = currentSession) {
+            if (!session || !session.year || !session.semester || !session.examType) return '회차 선택 안 됨';
+            return `${session.year}년 ${session.semester}학기 ${EXAM_TYPE_LABELS[session.examType] || session.examType}`;
+        }
+
+        function normalizeSession(entry) {
+            if (!entry) return null;
+            const year = parseInt(entry.year, 10);
+            const semester = String(entry.semester || '');
+            const examType = String(entry.examType || '');
+            if (!year || !SEMESTER_OPTIONS.includes(semester) || !EXAM_TYPE_OPTIONS.includes(examType)) {
+                return null;
+            }
+            return {
+                year,
+                semester,
+                examType,
+                key: `${year}-${semester}-${examType}`
+            };
+        }
+
+        function sortSessions(a, b) {
+            if (a.year !== b.year) return b.year - a.year;
+            if (a.semester !== b.semester) return parseInt(a.semester, 10) - parseInt(b.semester, 10);
+            return EXAM_TYPE_OPTIONS.indexOf(a.examType) - EXAM_TYPE_OPTIONS.indexOf(b.examType);
+        }
+
+        function normalizeSessionIndex(list) {
+            const map = new Map();
+            (Array.isArray(list) ? list : []).forEach(entry => {
+                const normalized = normalizeSession(entry);
+                if (normalized) map.set(normalized.key, normalized);
+            });
+            return Array.from(map.values()).sort(sortSessions);
+        }
+
+        function getSelectedSessionFromStorage() {
+            const saved = localStorage.getItem(SESSION_SELECTION_KEY);
+            if (!saved) return null;
+            try {
+                return normalizeSession(JSON.parse(saved));
+            } catch (error) {
+                console.error('selectedExamSession JSON 파싱 실패:', error);
+                return null;
+            }
+        }
+
+        function persistCurrentSession() {
+            localStorage.setItem(SESSION_SELECTION_KEY, JSON.stringify(currentSession));
+        }
+
+        function sessionExists(session = currentSession) {
+            const key = getSessionKey(session);
+            return examSessionIndex.some(entry => entry.key === key);
+        }
+
+        function getCurrentSessionPath(child = '') {
+            const base = `examSessions/${currentSession.year}/${currentSession.semester}/${currentSession.examType}`;
+            return child ? `${base}/${child}` : base;
+        }
+
+        function getCurrentSessionStorageKey(base) {
+            return `${base}:${getSessionKey()}`;
+        }
+
+        function getSessionRef(child = '') {
+            return database.ref(getCurrentSessionPath(child));
+        }
+
+        function saveSessionIndex() {
+            examSessionIndex = normalizeSessionIndex(examSessionIndex);
+            if (useFirebase && database) {
+                return database.ref(SESSION_INDEX_KEY).set(sanitizeForFirebase(examSessionIndex));
+            }
+            localStorage.setItem(SESSION_INDEX_KEY, JSON.stringify(examSessionIndex));
+            return Promise.resolve();
+        }
+
+        function loadLocalSessionIndex() {
+            const saved = localStorage.getItem(SESSION_INDEX_KEY);
+            if (!saved) return [];
+            try {
+                return normalizeSessionIndex(JSON.parse(saved));
+            } catch (error) {
+                console.error('examSessionIndex JSON 파싱 실패:', error);
+                return [];
+            }
+        }
+
         // ==================== 초기 학생 데이터 (백업용) ====================
         const defaultStudents = [
             // 1학년 1반
@@ -2483,6 +2736,121 @@
             '프랑스어', '중국어', '일본어'
         ];
 
+        function updatePageTitle() {
+            const title = `${getSessionLabel()} - 학생 자료 배부 체크리스트`;
+            document.title = title;
+            const heading = document.getElementById('pageTitle');
+            if (heading) heading.textContent = title;
+            const currentLabel = document.getElementById('currentSessionLabel');
+            if (currentLabel) currentLabel.textContent = `현재 회차: ${getSessionLabel()}`;
+        }
+
+        function getYearsFromSessions() {
+            return [...new Set(examSessionIndex.map(entry => entry.year))].sort((a, b) => b - a);
+        }
+
+        function renderSessionTabs() {
+            const yearTabs = document.getElementById('yearTabs');
+            const semesterTabs = document.getElementById('semesterTabs');
+            const examTabs = document.getElementById('examTabs');
+            if (!yearTabs || !semesterTabs || !examTabs) return;
+
+            const years = getYearsFromSessions();
+            yearTabs.innerHTML = years.map(year => `
+                <button type="button" class="session-pill ${currentSession.year === year ? 'active' : ''}" onclick="selectSessionYear(${year})">${year}년</button>
+            `).join('');
+
+            const semestersForYear = [...new Set(
+                examSessionIndex.filter(entry => entry.year === currentSession.year).map(entry => entry.semester)
+            )].sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+
+            semesterTabs.innerHTML = semestersForYear.map(semester => `
+                <button type="button" class="session-pill ${currentSession.semester === semester ? 'active' : ''}" onclick="selectSessionSemester('${semester}')">${semester}학기</button>
+            `).join('');
+
+            const examsForCurrent = examSessionIndex
+                .filter(entry => entry.year === currentSession.year && entry.semester === currentSession.semester)
+                .sort(sortSessions);
+
+            examTabs.innerHTML = examsForCurrent.map(entry => `
+                <button type="button" class="session-pill ${entry.examType === currentSession.examType ? 'active' : ''}" onclick="selectSessionExamType('${entry.examType}')">${EXAM_TYPE_LABELS[entry.examType]}</button>
+            `).join('');
+
+            if (years.length === 0) {
+                yearTabs.innerHTML = '<span class="session-pill muted">회차 없음</span>';
+                semesterTabs.innerHTML = '<span class="session-pill muted">회차 없음</span>';
+                examTabs.innerHTML = '<span class="session-pill muted">회차 없음</span>';
+            } else if (semestersForYear.length === 0) {
+                semesterTabs.innerHTML = '<span class="session-pill muted">학기 없음</span>';
+                examTabs.innerHTML = '<span class="session-pill muted">시험 없음</span>';
+            } else if (examsForCurrent.length === 0) {
+                examTabs.innerHTML = '<span class="session-pill muted">시험 없음</span>';
+            }
+
+            updatePageTitle();
+            updateSessionEmptyState();
+        }
+
+        function updateSessionEmptyState() {
+            const emptyState = document.getElementById('sessionEmptyState');
+            const emptyStateText = document.getElementById('sessionEmptyStateText');
+            const mainContent = document.getElementById('mainAppContent');
+            if (!emptyState || !mainContent) return;
+
+            const exists = sessionExists();
+            if (exists) {
+                emptyState.style.display = 'none';
+                mainContent.style.display = '';
+                return;
+            }
+
+            emptyState.style.display = 'block';
+            mainContent.style.display = 'none';
+            if (emptyStateText) {
+                emptyStateText.textContent = `${getSessionLabel()} 회차가 아직 없습니다. 상단의 새 회차 만들기 버튼으로 먼저 생성하세요.`;
+            }
+        }
+
+        function ensureCurrentSessionSelection() {
+            const stored = getSelectedSessionFromStorage();
+            if (stored && examSessionIndex.some(entry => entry.key === stored.key)) {
+                currentSession = { year: stored.year, semester: stored.semester, examType: stored.examType };
+            } else if (examSessionIndex.length > 0) {
+                const [first] = examSessionIndex;
+                currentSession = { year: first.year, semester: first.semester, examType: first.examType };
+            } else {
+                currentSession = { ...LEGACY_SESSION };
+            }
+            persistCurrentSession();
+        }
+
+        function selectSessionYear(year) {
+            const sessions = examSessionIndex.filter(entry => entry.year === year).sort(sortSessions);
+            if (sessions.length === 0) return;
+            currentSession = { year, semester: sessions[0].semester, examType: sessions[0].examType };
+            onSessionChanged();
+        }
+
+        function selectSessionSemester(semester) {
+            const sessions = examSessionIndex
+                .filter(entry => entry.year === currentSession.year && entry.semester === semester)
+                .sort(sortSessions);
+            if (sessions.length === 0) return;
+            currentSession = { year: currentSession.year, semester, examType: sessions[0].examType };
+            onSessionChanged();
+        }
+
+        function selectSessionExamType(examType) {
+            const exists = examSessionIndex.some(entry =>
+                entry.year === currentSession.year &&
+                entry.semester === currentSession.semester &&
+                entry.examType === examType
+            );
+            if (!exists) return;
+            currentSession = { year: currentSession.year, semester: currentSession.semester, examType };
+            onSessionChanged();
+        }
+
         // ==================== 탭 전환 ====================
         // 탭 버튼 순서와 탭 ID 매핑
         const tabButtonOrder = [1, 2, 5, 6, 7, 3, 4];
@@ -2525,6 +2893,226 @@
             }
         }
 
+        async function bootstrapExamSessions() {
+            if (useFirebase && database) {
+                try {
+                    const [indexSnapshot, legacyStudentsSnapshot, sessionSnapshot] = await Promise.all([
+                        database.ref(SESSION_INDEX_KEY).once('value'),
+                        database.ref('students').once('value'),
+                        database.ref(getCurrentSessionPath()).once('value')
+                    ]);
+
+                    examSessionIndex = normalizeSessionIndex(indexSnapshot.val());
+                    const legacyStudents = legacyStudentsSnapshot.val();
+                    const legacySession = sessionSnapshot.val();
+
+                    if (examSessionIndex.length === 0) {
+                        examSessionIndex = [{ ...normalizeSession(LEGACY_SESSION) }];
+                        await saveSessionIndex();
+                    }
+
+                    if ((!legacySession || !legacySession.students) && Array.isArray(legacyStudents)) {
+                        await migrateLegacyDataToCurrentSession();
+                    }
+                } catch (error) {
+                    console.error('❌ Firebase 회차 초기화 실패:', error);
+                    examSessionIndex = loadLocalSessionIndex();
+                }
+            } else {
+                examSessionIndex = loadLocalSessionIndex();
+                if (examSessionIndex.length === 0) {
+                    examSessionIndex = [{ ...normalizeSession(LEGACY_SESSION) }];
+                    await saveSessionIndex();
+                }
+                migrateLegacyLocalDataIfNeeded();
+            }
+
+            ensureCurrentSessionSelection();
+            renderSessionTabs();
+        }
+
+        async function migrateLegacyDataToCurrentSession() {
+            if (!useFirebase || !database) return;
+            try {
+                const [studentsSnap, waitlistSnap, checkedSnap, wrongSnap] = await Promise.all([
+                    database.ref('students').once('value'),
+                    database.ref('waitlist').once('value'),
+                    database.ref('checkedStudents').once('value'),
+                    database.ref('wrongAnswerData').once('value')
+                ]);
+
+                const legacyStudents = studentsSnap.val();
+                if (!Array.isArray(legacyStudents)) return;
+
+                const migratedStudents = JSON.parse(JSON.stringify(legacyStudents));
+                const migratedWaitlist = Array.isArray(waitlistSnap.val()) ? waitlistSnap.val() : [];
+                const migratedChecked = checkedSnap.val() || {};
+                const migratedWrong = wrongSnap.val() || {};
+
+                students.length = 0;
+                students.push(...migratedStudents);
+                ensureNewFields();
+                normalizeStudentPhones();
+                ensureStudentIds();
+                removeDuplicateStudents();
+                waitlist.length = 0;
+                waitlist.push(...migratedWaitlist);
+                normalizeWaitlist();
+                checkedStudents = normalizeCheckedStudents(migratedChecked);
+                wrongAnswerData = migratedWrong;
+
+                const studentsById = buildStudentsById();
+                await Promise.all([
+                    getSessionRef('students').set(sanitizeForFirebase(students)),
+                    getSessionRef('waitlist').set(sanitizeForFirebase(waitlist)),
+                    getSessionRef('waitlistById').set(sanitizeForFirebase(buildWaitlistById())),
+                    getSessionRef('studentsById').set(sanitizeForFirebase(studentsById)),
+                    getSessionRef('codeIndex').set(sanitizeForFirebase(buildCodeIndex())),
+                    getSessionRef('checkedStudents').set(sanitizeForFirebase(checkedStudents)),
+                    getSessionRef('checkedByStudent').set(sanitizeForFirebase(buildCheckedByStudent(checkedStudents))),
+                    getSessionRef('wrongAnswerData').set(sanitizeForFirebase(wrongAnswerData))
+                ]);
+            } catch (error) {
+                console.error('❌ 기존 Firebase 데이터를 회차 구조로 이전하지 못했습니다:', error);
+            }
+        }
+
+        function migrateLegacyLocalDataIfNeeded() {
+            const sessionStudentsKey = getCurrentSessionStorageKey('studentsData');
+            if (localStorage.getItem(sessionStudentsKey)) return;
+
+            const savedStudents = localStorage.getItem('studentsData');
+            const savedWaitlist = localStorage.getItem('waitlistData');
+            const savedChecklist = localStorage.getItem('studentChecklist');
+            const savedWrongAnswer = localStorage.getItem('wrongAnswerData');
+
+            if (savedStudents) localStorage.setItem(sessionStudentsKey, savedStudents);
+            if (savedWaitlist) localStorage.setItem(getCurrentSessionStorageKey('waitlistData'), savedWaitlist);
+            if (savedChecklist) localStorage.setItem(getCurrentSessionStorageKey('studentChecklist'), savedChecklist);
+            if (savedWrongAnswer) localStorage.setItem(getCurrentSessionStorageKey('wrongAnswerData'), savedWrongAnswer);
+        }
+
+        function onSessionChanged() {
+            persistCurrentSession();
+            renderSessionTabs();
+            detachFirebaseListeners();
+            parentViewStudents = [];
+            parentCheckedByStudent = {};
+            const parentAccessInput = document.getElementById('parentAccessCode');
+            if (parentAccessInput) parentAccessInput.value = '';
+            document.getElementById('parentViewStatus').textContent = '코드를 입력해주세요.';
+            if (sessionExists()) {
+                loadStudentsData(() => {
+                    loadWeekData();
+                    loadWrongAnswerData();
+                });
+                if (useFirebase && database && isAdmin) {
+                    setupFirebaseListeners();
+                }
+            } else {
+                students.length = 0;
+                waitlist.length = 0;
+                checkedStudents = {};
+                wrongAnswerData = {};
+                renderStudents();
+                if (currentTab === 2) renderTab2();
+                if (currentTab === 3) renderTab3();
+                if (currentTab === 5) renderTab5();
+                if (currentTab === 6) renderTab6();
+                if (currentTab === 7) renderTab7();
+                renderParentView();
+            }
+        }
+
+        function createExamSession() {
+            if (!isAdmin) {
+                alert('관리자 로그인 후 새 회차를 만들 수 있습니다.');
+                return;
+            }
+
+            const defaultYear = String(currentSession.year || new Date().getFullYear());
+            const yearInput = prompt('년도 4자리를 입력해주세요. 예: 2026', defaultYear);
+            if (yearInput === null) return;
+            const year = parseInt(yearInput.trim(), 10);
+            if (!year || year < 2000 || year > 2100) {
+                alert('올바른 년도를 입력해주세요.');
+                return;
+            }
+
+            const semesterInput = prompt('학기를 입력해주세요. 1 또는 2', currentSession.semester || '1');
+            if (semesterInput === null) return;
+            const semester = semesterInput.trim();
+            if (!SEMESTER_OPTIONS.includes(semester)) {
+                alert('학기는 1 또는 2만 가능합니다.');
+                return;
+            }
+
+            const typeDefault = currentSession.examType === 'final' ? '기말' : '중간';
+            const examInput = prompt('시험 구분을 입력해주세요. 중간 또는 기말', typeDefault);
+            if (examInput === null) return;
+            const normalizedExam = examInput.includes('기말') || examInput.toLowerCase() === 'final' ? 'final' : examInput.includes('중간') || examInput.toLowerCase() === 'midterm' ? 'midterm' : '';
+            if (!normalizedExam) {
+                alert('시험 구분은 중간 또는 기말만 가능합니다.');
+                return;
+            }
+
+            const newSession = normalizeSession({ year, semester, examType: normalizedExam });
+            if (!newSession) {
+                alert('회차 정보를 다시 확인해주세요.');
+                return;
+            }
+            if (sessionExists(newSession)) {
+                currentSession = { year: newSession.year, semester: newSession.semester, examType: newSession.examType };
+                onSessionChanged();
+                alert('이미 있는 회차여서 해당 회차로 이동했습니다.');
+                return;
+            }
+
+            examSessionIndex.push(newSession);
+            saveSessionIndex()
+                .then(() => initializeEmptySession(newSession))
+                .then(() => {
+                    currentSession = { year: newSession.year, semester: newSession.semester, examType: newSession.examType };
+                    onSessionChanged();
+                    alert(`${getSessionLabel(newSession)} 회차를 만들었습니다.`);
+                })
+                .catch((error) => {
+                    console.error('❌ 새 회차 생성 실패:', error);
+                    alert('새 회차 생성 중 오류가 발생했습니다.');
+                });
+        }
+
+        function initializeEmptySession(session) {
+            const emptyStudents = [];
+            const emptyWaitlist = [];
+            const emptyChecked = {};
+            const emptyWrongAnswer = {};
+            const path = `examSessions/${session.year}/${session.semester}/${session.examType}`;
+
+            if (useFirebase && database) {
+                return Promise.all([
+                    database.ref(`${path}/students`).set([]),
+                    database.ref(`${path}/waitlist`).set([]),
+                    database.ref(`${path}/waitlistById`).set({}),
+                    database.ref(`${path}/studentsById`).set({}),
+                    database.ref(`${path}/codeIndex`).set({}),
+                    database.ref(`${path}/checkedStudents`).set({}),
+                    database.ref(`${path}/checkedByStudent`).set({}),
+                    database.ref(`${path}/wrongAnswerData`).set({})
+                ]);
+            }
+
+            localStorage.setItem(`studentsData:${session.key}`, JSON.stringify(emptyStudents));
+            localStorage.setItem(`waitlistData:${session.key}`, JSON.stringify(emptyWaitlist));
+            localStorage.setItem(`studentChecklist:${session.key}`, JSON.stringify(emptyChecked));
+            localStorage.setItem(`wrongAnswerData:${session.key}`, JSON.stringify(emptyWrongAnswer));
+            localStorage.setItem(`studentsById:${session.key}`, JSON.stringify({}));
+            localStorage.setItem(`waitlistById:${session.key}`, JSON.stringify({}));
+            localStorage.setItem(`codeIndex:${session.key}`, JSON.stringify({}));
+            localStorage.setItem(`checkedByStudent:${session.key}`, JSON.stringify({}));
+            return Promise.resolve();
+        }
+
         // ==================== 초기 설정 ====================
         window.onload = function() {
             const now = new Date();
@@ -2535,11 +3123,6 @@
             document.getElementById('waWeekSelect').value = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
             wrongAnswerWeek = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
 
-            loadStudentsData(() => {
-                loadWeekData();
-                loadWrongAnswerData();
-            });
-
             document.getElementById('searchInput').addEventListener('input', searchStudents);
             document.getElementById('tab2SearchInput').addEventListener('input', searchStudentsTab2);
             document.getElementById('tab3SearchInput').addEventListener('input', searchStudentsTab3);
@@ -2547,38 +3130,64 @@
             document.getElementById('subjectPickerSearch').addEventListener('input', filterSubjectPickerList);
             document.getElementById('tab7SearchInput').addEventListener('input', searchStudentsTab7);
 
-            // 엑셀 업로드 이벤트
             setupExcelUpload();
             setupParentView();
             setupCodeTtl();
             setupAdminPassword();
+
+            bootstrapExamSessions().then(() => {
+                if (sessionExists()) {
+                    if (useFirebase && database && isAdmin) {
+                        setupFirebaseListeners();
+                    }
+                    loadStudentsData(() => {
+                        loadWeekData();
+                        loadWrongAnswerData();
+                    });
+                } else {
+                    renderSessionTabs();
+                }
+            });
         };
+
+        function detachFirebaseListeners() {
+            if (!database) return;
+            activeFirebaseSessionPaths.forEach(path => database.ref(path).off());
+            activeFirebaseSessionPaths = [];
+        }
 
         // Firebase 실시간 리스너 설정
         function setupFirebaseListeners() {
-            database.ref('students').on('value', (snapshot) => {
+            detachFirebaseListeners();
+            activeFirebaseSessionPaths = [
+                getCurrentSessionPath('students'),
+                getCurrentSessionPath('waitlist'),
+                getCurrentSessionPath('checkedStudents'),
+                getCurrentSessionPath('wrongAnswerData')
+            ];
+
+            getSessionRef('students').on('value', (snapshot) => {
                 let savedData = snapshot.val();
-                if (savedData && Array.isArray(savedData) && savedData.length > 0) {
-                    savedData.forEach(s => { if (!Array.isArray(s.subjects)) s.subjects = []; });
-                    if (JSON.stringify(students) !== JSON.stringify(savedData)) {
-                        students.length = 0;
-                        students.push(...savedData);
-                        const fieldsChanged = ensureNewFields();
-                        const changed = ensureStudentIds();
-                        const deduped = removeDuplicateStudents();
-                        if (fieldsChanged || changed || deduped) saveStudentsData();
-                        renderStudents();
-                        if (currentTab === 2) renderTab2();
-                        if (currentTab === 3) renderTab3();
-                        if (currentTab === 5) renderTab5();
-                        if (currentTab === 6) renderTab6();
-                        if (currentTab === 7) renderTab7();
-                        console.log("🔄 실시간 동기화: 학생 데이터 업데이트됨");
-                    }
+                const normalized = Array.isArray(savedData) ? savedData : [];
+                normalized.forEach(s => { if (!Array.isArray(s.subjects)) s.subjects = []; });
+                if (JSON.stringify(students) !== JSON.stringify(normalized)) {
+                    students.length = 0;
+                    students.push(...normalized);
+                    const fieldsChanged = ensureNewFields();
+                    const changed = ensureStudentIds();
+                    const deduped = removeDuplicateStudents();
+                    if ((fieldsChanged || changed || deduped) && normalized.length > 0) saveStudentsData();
+                    renderStudents();
+                    if (currentTab === 2) renderTab2();
+                    if (currentTab === 3) renderTab3();
+                    if (currentTab === 5) renderTab5();
+                    if (currentTab === 6) renderTab6();
+                    if (currentTab === 7) renderTab7();
+                    console.log("🔄 실시간 동기화: 학생 데이터 업데이트됨");
                 }
             });
 
-            database.ref('waitlist').on('value', (snapshot) => {
+            getSessionRef('waitlist').on('value', (snapshot) => {
                 const savedData = snapshot.val();
                 const normalized = Array.isArray(savedData) ? savedData : [];
                 if (JSON.stringify(waitlist) !== JSON.stringify(normalized)) {
@@ -2590,22 +3199,21 @@
                 }
             });
 
-            database.ref('checkedStudents').on('value', (snapshot) => {
+            getSessionRef('checkedStudents').on('value', (snapshot) => {
                 const savedData = snapshot.val();
-                if (savedData) {
-                    const normalized = normalizeCheckedStudents(savedData);
-                    if (JSON.stringify(checkedStudents) !== JSON.stringify(normalized)) {
-                        checkedStudents = normalized;
-                        renderStudents();
-                        console.log("🔄 실시간 동기화: 체크 데이터 업데이트됨");
-                    }
+                const normalized = savedData ? normalizeCheckedStudents(savedData) : {};
+                if (JSON.stringify(checkedStudents) !== JSON.stringify(normalized)) {
+                    checkedStudents = normalized;
+                    renderStudents();
+                    console.log("🔄 실시간 동기화: 체크 데이터 업데이트됨");
                 }
             });
 
-            database.ref('wrongAnswerData').on('value', (snapshot) => {
+            getSessionRef('wrongAnswerData').on('value', (snapshot) => {
                 const savedData = snapshot.val();
-                if (savedData && JSON.stringify(wrongAnswerData) !== JSON.stringify(savedData)) {
-                    wrongAnswerData = savedData;
+                const normalized = savedData || {};
+                if (JSON.stringify(wrongAnswerData) !== JSON.stringify(normalized)) {
+                    wrongAnswerData = normalized;
                     if (currentTab === 7) renderTab7();
                     console.log("🔄 실시간 동기화: 오답 데이터 업데이트됨");
                 }
@@ -2695,7 +3303,10 @@
                 if (useFirebase && database) {
                     setupFirebaseListeners();
                 }
-                loadStudentsData(() => loadWeekData());
+                loadStudentsData(() => {
+                    loadWeekData();
+                    loadWrongAnswerData();
+                });
                 updateAdminCheckNote();
                 updateSubjectOverviewVisibility();
                 return;
@@ -2737,12 +3348,17 @@
         function adminLogout() {
             isAdmin = false;
             localStorage.removeItem('adminModeEnabled');
+            detachFirebaseListeners();
             showAdminAuthAlert('관리자 모드 해제됨', 'success');
             if (currentTab < 4) {
                 switchTab(4, true);
             }
             updateAdminCheckNote();
             updateSubjectOverviewVisibility();
+            loadStudentsData(() => {
+                loadWeekData();
+                loadWrongAnswerData();
+            });
         }
 
         function resetAdminPassword() {
@@ -2753,6 +3369,7 @@
             localStorage.setItem('adminPasswordValue', adminPassword);
             isAdmin = false;
             localStorage.removeItem('adminModeEnabled');
+            detachFirebaseListeners();
             if (currentTab < 4) {
                 switchTab(4, true);
             }
@@ -2763,6 +3380,10 @@
             showAdminAuthAlert('비밀번호가 초기화되었습니다. 다시 로그인해주세요.', 'success');
             updateAdminCheckNote();
             updateSubjectOverviewVisibility();
+            loadStudentsData(() => {
+                loadWeekData();
+                loadWrongAnswerData();
+            });
         }
 
         function showAdminAuthAlert(message, type) {
@@ -2795,7 +3416,7 @@
                 document.getElementById('parentViewStatus').textContent = 'Firebase 연결이 필요합니다.';
                 return;
             }
-            database.ref(`codeIndex/${code}`).once('value')
+            getSessionRef(`codeIndex/${code}`).once('value')
                 .then((snapshot) => {
                     const studentId = snapshot.val();
                     if (!studentId) {
@@ -2806,8 +3427,8 @@
                         return;
                     }
                     return Promise.all([
-                        database.ref(`studentsById/${studentId}`).once('value'),
-                        database.ref(`checkedByStudent/${studentId}`).once('value')
+                        getSessionRef(`studentsById/${studentId}`).once('value'),
+                        getSessionRef(`checkedByStudent/${studentId}`).once('value')
                     ]).then(([studentSnap, checkedSnap]) => {
                         const student = studentSnap.val();
                         if (!student) {
@@ -3717,6 +4338,12 @@
         function loadWeekData() {
             currentWeek = document.getElementById('weekSelect').value;
 
+            if (!sessionExists()) {
+                checkedStudents = {};
+                renderStudents();
+                return;
+            }
+
             if (useFirebase && database && !isAdmin) {
                 checkedStudents = {};
                 renderStudents();
@@ -3724,7 +4351,7 @@
             }
 
             if (useFirebase && database) {
-                database.ref('checkedStudents').once('value')
+                getSessionRef('checkedStudents').once('value')
                     .then((snapshot) => {
                         const savedData = snapshot.val();
                         if (savedData) {
@@ -3734,16 +4361,16 @@
                     })
                     .catch((error) => {
                         console.error("❌ Firebase 체크 데이터 로드 실패:", error);
-                        const saved = localStorage.getItem('studentChecklist');
+                        const saved = localStorage.getItem(getCurrentSessionStorageKey('studentChecklist'));
                         if (saved) {
-                            checkedStudents = normalizeCheckedStudents(JSON.parse(saved));
+                            try { checkedStudents = normalizeCheckedStudents(JSON.parse(saved)); } catch(e) { console.error('studentChecklist JSON 파싱 실패:', e); }
                         }
                         renderStudents();
                     });
             } else {
-                const saved = localStorage.getItem('studentChecklist');
+                const saved = localStorage.getItem(getCurrentSessionStorageKey('studentChecklist'));
                 if (saved) {
-                    checkedStudents = normalizeCheckedStudents(JSON.parse(saved));
+                    try { checkedStudents = normalizeCheckedStudents(JSON.parse(saved)); } catch(e) { console.error('studentChecklist JSON 파싱 실패:', e); }
                 }
                 renderStudents();
             }
@@ -3753,16 +4380,16 @@
             if (useFirebase && database) {
                 const checkedByStudent = buildCheckedByStudent(checkedStudents);
                 Promise.all([
-                    database.ref('checkedStudents').set(checkedStudents),
-                    database.ref('checkedByStudent').set(checkedByStudent)
+                    getSessionRef('checkedStudents').set(sanitizeForFirebase(checkedStudents)),
+                    getSessionRef('checkedByStudent').set(sanitizeForFirebase(checkedByStudent))
                 ])
                 .catch((error) => {
                     console.error("❌ Firebase 저장 실패:", error);
-                    localStorage.setItem('studentChecklist', JSON.stringify(checkedStudents));
+                    localStorage.setItem(getCurrentSessionStorageKey('studentChecklist'), JSON.stringify(checkedStudents));
                 });
             } else {
-                localStorage.setItem('studentChecklist', JSON.stringify(checkedStudents));
-                localStorage.setItem('checkedByStudent', JSON.stringify(buildCheckedByStudent(checkedStudents)));
+                localStorage.setItem(getCurrentSessionStorageKey('studentChecklist'), JSON.stringify(checkedStudents));
+                localStorage.setItem(getCurrentSessionStorageKey('checkedByStudent'), JSON.stringify(buildCheckedByStudent(checkedStudents)));
             }
         }
 
@@ -5535,32 +6162,45 @@
             return result;
         }
 
+        function sanitizeForFirebase(obj) {
+            return JSON.parse(JSON.stringify(obj, (k, v) => v === undefined ? null : v));
+        }
+
         function saveStudentsData() {
             if (useFirebase && database) {
                 const studentsById = buildStudentsById();
                 const codeIndex = buildCodeIndex();
                 Promise.all([
-                    database.ref('students').set(students),
-                    database.ref('waitlist').set(waitlist),
-                    database.ref('waitlistById').set(buildWaitlistById()),
-                    database.ref('studentsById').set(studentsById),
-                    database.ref('codeIndex').set(codeIndex)
+                    getSessionRef('students').set(sanitizeForFirebase(students)),
+                    getSessionRef('waitlist').set(sanitizeForFirebase(waitlist)),
+                    getSessionRef('waitlistById').set(sanitizeForFirebase(buildWaitlistById())),
+                    getSessionRef('studentsById').set(sanitizeForFirebase(studentsById)),
+                    getSessionRef('codeIndex').set(sanitizeForFirebase(codeIndex))
                 ])
                 .catch((error) => {
                     console.error("❌ Firebase 저장 실패:", error);
-                    localStorage.setItem('studentsData', JSON.stringify(students));
-                    localStorage.setItem('waitlistData', JSON.stringify(waitlist));
+                    localStorage.setItem(getCurrentSessionStorageKey('studentsData'), JSON.stringify(students));
+                    localStorage.setItem(getCurrentSessionStorageKey('waitlistData'), JSON.stringify(waitlist));
                 });
             } else {
-                localStorage.setItem('studentsData', JSON.stringify(students));
-                localStorage.setItem('waitlistData', JSON.stringify(waitlist));
-                localStorage.setItem('studentsById', JSON.stringify(buildStudentsById()));
-                localStorage.setItem('waitlistById', JSON.stringify(buildWaitlistById()));
-                localStorage.setItem('codeIndex', JSON.stringify(buildCodeIndex()));
+                localStorage.setItem(getCurrentSessionStorageKey('studentsData'), JSON.stringify(students));
+                localStorage.setItem(getCurrentSessionStorageKey('waitlistData'), JSON.stringify(waitlist));
+                localStorage.setItem(getCurrentSessionStorageKey('studentsById'), JSON.stringify(buildStudentsById()));
+                localStorage.setItem(getCurrentSessionStorageKey('waitlistById'), JSON.stringify(buildWaitlistById()));
+                localStorage.setItem(getCurrentSessionStorageKey('codeIndex'), JSON.stringify(buildCodeIndex()));
             }
         }
 
         function loadStudentsData(onLoaded) {
+            if (!sessionExists()) {
+                students.length = 0;
+                waitlist.length = 0;
+                checkedStudents = {};
+                wrongAnswerData = {};
+                renderStudents();
+                if (typeof onLoaded === 'function') onLoaded();
+                return;
+            }
             if (useFirebase && database && !isAdmin) {
                 students.length = 0;
                 waitlist.length = 0;
@@ -5571,8 +6211,8 @@
             }
             if (useFirebase && database) {
                 Promise.all([
-                    database.ref('students').once('value'),
-                    database.ref('waitlist').once('value')
+                    getSessionRef('students').once('value'),
+                    getSessionRef('waitlist').once('value')
                 ])
                     .then(([snapshot, waitlistSnapshot]) => {
                         const savedData = snapshot.val();
@@ -5611,9 +6251,20 @@
         }
 
         function loadFromLocalStorage() {
-            const saved = localStorage.getItem('studentsData');
+            const saved = localStorage.getItem(getCurrentSessionStorageKey('studentsData'));
             if (saved) {
-                const savedData = JSON.parse(saved);
+                let savedData;
+                try { savedData = JSON.parse(saved); } catch(e) { console.error('studentsData JSON 파싱 실패:', e); savedData = null; }
+                if (!Array.isArray(savedData)) savedData = null;
+                if (!savedData) {
+                    students.length = 0;
+                    students.push(...JSON.parse(JSON.stringify(defaultStudents)));
+                    ensureNewFields();
+                    normalizeStudentPhones();
+                    ensureStudentIds();
+                    removeDuplicateStudents();
+                    return;
+                }
                 students.length = 0;
                 students.push(...savedData);
                 const fieldsChanged = ensureNewFields();
@@ -5629,10 +6280,10 @@
                 ensureStudentIds();
                 removeDuplicateStudents();
             }
-            const savedWaitlist = localStorage.getItem('waitlistData');
+            const savedWaitlist = localStorage.getItem(getCurrentSessionStorageKey('waitlistData'));
             waitlist.length = 0;
             if (savedWaitlist) {
-                waitlist.push(...JSON.parse(savedWaitlist));
+                try { waitlist.push(...JSON.parse(savedWaitlist)); } catch(e) { console.error('waitlistData JSON 파싱 실패:', e); }
             }
             if (normalizeWaitlist()) saveStudentsData();
         }
@@ -5652,11 +6303,11 @@
             if (useFirebase && database) {
                 const studentsById = buildStudentsById();
                 Promise.all([
-                    database.ref('students').set(students),
-                    database.ref('waitlist').set(waitlist),
-                    database.ref('waitlistById').set({}),
-                    database.ref('studentsById').set(studentsById),
-                    database.ref('codeIndex').set(buildCodeIndex())
+                    getSessionRef('students').set(sanitizeForFirebase(students)),
+                    getSessionRef('waitlist').set(sanitizeForFirebase(waitlist)),
+                    getSessionRef('waitlistById').set({}),
+                    getSessionRef('studentsById').set(sanitizeForFirebase(studentsById)),
+                    getSessionRef('codeIndex').set(sanitizeForFirebase(buildCodeIndex()))
                 ])
                     .then(() => {
                         alert('학생 데이터가 초기값으로 리셋되었습니다!');
@@ -5667,11 +6318,11 @@
                         alert('리셋 중 오류가 발생했습니다.');
                     });
             } else {
-                localStorage.removeItem('studentsData');
-                localStorage.removeItem('waitlistData');
-                localStorage.setItem('studentsById', JSON.stringify(buildStudentsById()));
-                localStorage.setItem('waitlistById', JSON.stringify(buildWaitlistById()));
-                localStorage.setItem('codeIndex', JSON.stringify(buildCodeIndex()));
+                localStorage.removeItem(getCurrentSessionStorageKey('studentsData'));
+                localStorage.removeItem(getCurrentSessionStorageKey('waitlistData'));
+                localStorage.setItem(getCurrentSessionStorageKey('studentsById'), JSON.stringify(buildStudentsById()));
+                localStorage.setItem(getCurrentSessionStorageKey('waitlistById'), JSON.stringify(buildWaitlistById()));
+                localStorage.setItem(getCurrentSessionStorageKey('codeIndex'), JSON.stringify(buildCodeIndex()));
                 alert('학생 데이터가 초기값으로 리셋되었습니다!');
                 showSaveIndicator();
             }
@@ -5695,13 +6346,14 @@
 
             if (useFirebase && database) {
                 Promise.all([
-                    database.ref('students').set(students),
-                    database.ref('waitlist').set(waitlist),
-                    database.ref('waitlistById').set({}),
-                    database.ref('studentsById').set({}),
-                    database.ref('codeIndex').set({}),
-                    database.ref('checkedStudents').set(checkedStudents),
-                    database.ref('checkedByStudent').set({})
+                    getSessionRef('students').set(sanitizeForFirebase(students)),
+                    getSessionRef('waitlist').set(sanitizeForFirebase(waitlist)),
+                    getSessionRef('waitlistById').set({}),
+                    getSessionRef('studentsById').set({}),
+                    getSessionRef('codeIndex').set({}),
+                    getSessionRef('checkedStudents').set(sanitizeForFirebase(checkedStudents)),
+                    getSessionRef('checkedByStudent').set({}),
+                    getSessionRef('wrongAnswerData').set({})
                 ])
                 .then(() => {
                     alert('모든 학생 데이터가 삭제되었습니다.');
@@ -5712,12 +6364,14 @@
                     alert('삭제 중 오류가 발생했습니다.');
                 });
             } else {
-                localStorage.removeItem('studentsData');
-                localStorage.removeItem('waitlistData');
-                localStorage.removeItem('studentChecklist');
-                localStorage.removeItem('studentsById');
-                localStorage.removeItem('waitlistById');
-                localStorage.removeItem('codeIndex');
+                localStorage.removeItem(getCurrentSessionStorageKey('studentsData'));
+                localStorage.removeItem(getCurrentSessionStorageKey('waitlistData'));
+                localStorage.removeItem(getCurrentSessionStorageKey('studentChecklist'));
+                localStorage.removeItem(getCurrentSessionStorageKey('studentsById'));
+                localStorage.removeItem(getCurrentSessionStorageKey('waitlistById'));
+                localStorage.removeItem(getCurrentSessionStorageKey('codeIndex'));
+                localStorage.removeItem(getCurrentSessionStorageKey('checkedByStudent'));
+                localStorage.removeItem(getCurrentSessionStorageKey('wrongAnswerData'));
                 alert('모든 학생 데이터가 삭제되었습니다.');
                 showSaveIndicator();
             }
@@ -6281,33 +6935,40 @@
         // ==================== 탭 7: 영어 오답 배부 ====================
 
         function saveWrongAnswerData() {
+            if (!sessionExists()) return;
             if (useFirebase && database) {
-                database.ref('wrongAnswerData').set(wrongAnswerData)
+                getSessionRef('wrongAnswerData').set(sanitizeForFirebase(wrongAnswerData))
                     .catch((error) => {
                         console.error("❌ Firebase 오답 데이터 저장 실패:", error);
-                        localStorage.setItem('wrongAnswerData', JSON.stringify(wrongAnswerData));
+                        localStorage.setItem(getCurrentSessionStorageKey('wrongAnswerData'), JSON.stringify(wrongAnswerData));
                     });
             } else {
-                localStorage.setItem('wrongAnswerData', JSON.stringify(wrongAnswerData));
+                localStorage.setItem(getCurrentSessionStorageKey('wrongAnswerData'), JSON.stringify(wrongAnswerData));
             }
         }
 
         function loadWrongAnswerData() {
+            if (!sessionExists()) {
+                wrongAnswerData = {};
+                if (currentTab === 7) renderTab7();
+                return;
+            }
+            wrongAnswerData = {};
             if (useFirebase && database) {
-                database.ref('wrongAnswerData').once('value').then((snapshot) => {
+                getSessionRef('wrongAnswerData').once('value').then((snapshot) => {
                     const savedData = snapshot.val();
                     if (savedData) {
                         wrongAnswerData = savedData;
                     }
                     if (currentTab === 7) renderTab7();
                 }).catch(() => {
-                    const saved = localStorage.getItem('wrongAnswerData');
-                    if (saved) wrongAnswerData = JSON.parse(saved);
+                    const saved = localStorage.getItem(getCurrentSessionStorageKey('wrongAnswerData'));
+                    if (saved) { try { wrongAnswerData = JSON.parse(saved); } catch(e) { console.error('wrongAnswerData JSON 파싱 실패:', e); } }
                     if (currentTab === 7) renderTab7();
                 });
             } else {
-                const saved = localStorage.getItem('wrongAnswerData');
-                if (saved) wrongAnswerData = JSON.parse(saved);
+                const saved = localStorage.getItem(getCurrentSessionStorageKey('wrongAnswerData'));
+                if (saved) { try { wrongAnswerData = JSON.parse(saved); } catch(e) { console.error('wrongAnswerData JSON 파싱 실패:', e); } }
                 if (currentTab === 7) renderTab7();
             }
         }
@@ -6323,7 +6984,9 @@
             if (!wrongAnswerData[subject][week][studentId]) {
                 wrongAnswerData[subject][week][studentId] = { items: [], checked: false };
             }
-            return wrongAnswerData[subject][week][studentId];
+            const entry = wrongAnswerData[subject][week][studentId];
+            if (!Array.isArray(entry.items)) entry.items = [];
+            return entry;
         }
 
         function renderTab7() {

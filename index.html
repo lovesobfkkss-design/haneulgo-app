@@ -6285,26 +6285,21 @@
                 ])
                     .then(([snapshot, waitlistSnapshot]) => {
                         const savedData = snapshot.val();
-                        if (savedData && Array.isArray(savedData)) {
-                            students.length = 0;
-                            students.push(...savedData);
-                            const fieldsChanged = ensureNewFields();
-                            normalizeStudentPhones();
-                            const changed = ensureStudentIds();
-                            const deduped = removeDuplicateStudents();
-                            if (fieldsChanged || changed || deduped) saveStudentsData();
-                        } else {
-                            students.length = 0;
-                            students.push(...JSON.parse(JSON.stringify(defaultStudents)));
-                            ensureNewFields();
-                            normalizeStudentPhones();
-                            ensureStudentIds();
-                            removeDuplicateStudents();
-                        }
+                        const normalizedStudents = Array.isArray(savedData) ? savedData : [];
+                        students.length = 0;
+                        students.push(...normalizedStudents);
+                        const fieldsChanged = ensureNewFields();
+                        normalizeStudentPhones();
+                        const changed = ensureStudentIds();
+                        const deduped = removeDuplicateStudents();
+
                         waitlist.length = 0;
                         waitlist.push(...(Array.isArray(waitlistSnapshot.val()) ? waitlistSnapshot.val() : []));
                         const waitlistChanged = normalizeWaitlist();
-                        if (!savedData || !Array.isArray(savedData) || waitlistChanged) saveStudentsData();
+
+                        if (fieldsChanged || changed || deduped || savedData === null || waitlistSnapshot.val() === null || waitlistChanged) {
+                            saveStudentsData();
+                        }
                         renderStudents();
                         if (typeof onLoaded === 'function') onLoaded();
                     })
@@ -6321,40 +6316,26 @@
 
         function loadFromLocalStorage() {
             const saved = localStorage.getItem(getCurrentSessionStorageKey('studentsData'));
+            let savedData = [];
             if (saved) {
-                let savedData;
-                try { savedData = JSON.parse(saved); } catch(e) { console.error('studentsData JSON 파싱 실패:', e); savedData = null; }
-                if (!Array.isArray(savedData)) savedData = null;
-                if (!savedData) {
-                    students.length = 0;
-                    students.push(...JSON.parse(JSON.stringify(defaultStudents)));
-                    ensureNewFields();
-                    normalizeStudentPhones();
-                    ensureStudentIds();
-                    removeDuplicateStudents();
-                    return;
-                }
-                students.length = 0;
-                students.push(...savedData);
-                const fieldsChanged = ensureNewFields();
-                normalizeStudentPhones();
-                const changed = ensureStudentIds();
-                const deduped = removeDuplicateStudents();
-                if (fieldsChanged || changed || deduped) saveStudentsData();
-            } else {
-                students.length = 0;
-                students.push(...JSON.parse(JSON.stringify(defaultStudents)));
-                ensureNewFields();
-                normalizeStudentPhones();
-                ensureStudentIds();
-                removeDuplicateStudents();
+                try { savedData = JSON.parse(saved); } catch(e) { console.error('studentsData JSON 파싱 실패:', e); savedData = []; }
             }
+            if (!Array.isArray(savedData)) savedData = [];
+
+            students.length = 0;
+            students.push(...savedData);
+            const fieldsChanged = ensureNewFields();
+            normalizeStudentPhones();
+            const changed = ensureStudentIds();
+            const deduped = removeDuplicateStudents();
+
             const savedWaitlist = localStorage.getItem(getCurrentSessionStorageKey('waitlistData'));
             waitlist.length = 0;
             if (savedWaitlist) {
                 try { waitlist.push(...JSON.parse(savedWaitlist)); } catch(e) { console.error('waitlistData JSON 파싱 실패:', e); }
             }
-            if (normalizeWaitlist()) saveStudentsData();
+            const waitlistChanged = normalizeWaitlist();
+            if (fieldsChanged || changed || deduped || waitlistChanged) saveStudentsData();
         }
 
         function resetToDefaultStudents() {

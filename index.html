@@ -1625,6 +1625,10 @@
                         <h4>2학년</h4>
                         <div class="subject-bars" id="subjectBarsGrade2"></div>
                     </div>
+                    <div class="subject-overview-grade" id="subjectOverviewGrade3">
+                        <h4>3학년</h4>
+                        <div class="subject-bars" id="subjectBarsGrade3"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1672,6 +1676,7 @@
                     <button class="btn btn-primary" onclick="filterGrade('all')">전체</button>
                     <button class="btn btn-secondary" onclick="filterGrade(1)">1학년</button>
                     <button class="btn btn-secondary" onclick="filterGrade(2)">2학년</button>
+                    <button class="btn btn-secondary" onclick="filterGrade(3)">3학년</button>
                     <select id="classFilter" class="search-box" onchange="filterByClass()" style="width: auto; min-width: 120px;">
                         <option value="all">모든 반</option>
                     </select>
@@ -1741,6 +1746,33 @@
                     </table>
                 </div>
             </div>
+
+            <div class="grade-section" id="grade3Section">
+                <div class="grade-header">
+                    <span>3학년</span>
+                    <span id="grade3Stats">0/0 완료</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>이름</th>
+                                <th>반</th>
+                                <th>신청 과목</th>
+                                <th>수령</th>
+                                <th class="phone">학생 전화번호</th>
+                                <th class="phone">학부모 전화번호</th>
+                                <th>입금액</th>
+                                <th style="text-align:center;">택배비</th>
+                                <th>입금확인</th>
+                                <th>배부완료</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grade3Body"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <!-- ==================== 탭 2: 신청/입금 현황 ==================== -->
@@ -1774,6 +1806,7 @@
                     <button class="btn btn-primary" onclick="filterGradeTab2('all')">전체</button>
                     <button class="btn btn-secondary" onclick="filterGradeTab2(1)">1학년</button>
                     <button class="btn btn-secondary" onclick="filterGradeTab2(2)">2학년</button>
+                    <button class="btn btn-secondary" onclick="filterGradeTab2(3)">3학년</button>
                     <select id="tab2ClassFilter" class="search-box" onchange="filterByClassTab2()" style="width: auto; min-width: 120px;">
                         <option value="all">모든 반</option>
                     </select>
@@ -1833,6 +1866,32 @@
                             </tr>
                         </thead>
                         <tbody id="tab2Grade2Body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grade-section" id="tab2Grade3Section">
+                <div class="grade-header">
+                    <span>3학년</span>
+                    <span id="tab2Grade3Stats">0명</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>이름</th>
+                                <th>반</th>
+                                <th>신청 과목</th>
+                                <th>수령</th>
+                                <th>입금액</th>
+                                <th style="text-align:center;">택배비</th>
+                                <th style="text-align:center;">현금영수증</th>
+                                <th style="text-align:center;">모바일URL</th>
+                                <th style="text-align:center;">입금확인</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tab2Grade3Body"></tbody>
                     </table>
                 </div>
             </div>
@@ -1938,6 +1997,31 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tab3Grade2Body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="grade-section" id="tab3Grade3Section">
+                        <div class="grade-header" style="font-size:15px; padding:8px 15px;">
+                            <span>3학년</span>
+                            <span id="tab3Grade3Count">0명</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>번호</th>
+                                        <th>이름</th>
+                                        <th>반</th>
+                                        <th>신청 과목</th>
+                                        <th>수령</th>
+                                        <th class="phone">학생 전화번호</th>
+                                        <th class="phone">학부모 전화번호</th>
+                                        <th style="text-align:center;">택배비</th>
+                                        <th>접속 코드</th>
+                                        <th>만료일</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tab3Grade3Body"></tbody>
                             </table>
                         </div>
                     </div>
@@ -2175,6 +2259,7 @@
                     <button class="btn btn-primary" onclick="filterGradeTab7('all')">전체</button>
                     <button class="btn btn-secondary" onclick="filterGradeTab7(1)">1학년</button>
                     <button class="btn btn-secondary" onclick="filterGradeTab7(2)">2학년</button>
+                    <button class="btn btn-secondary" onclick="filterGradeTab7(3)">3학년</button>
                     <select id="tab7ClassFilter" class="search-box" onchange="filterByClassTab7()" style="max-width:120px;">
                         <option value="all">모든 반</option>
                     </select>
@@ -2224,6 +2309,27 @@
                             </tr>
                         </thead>
                         <tbody id="tab7Grade2Body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grade-section" id="tab7Grade3Section">
+                <div class="grade-header">
+                    <span>3학년</span>
+                    <span id="tab7Grade3Stats">0명</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">#</th>
+                                <th style="width:60px;">이름</th>
+                                <th style="width:50px;">반</th>
+                                <th>오답 문제</th>
+                                <th style="width:50px;">배부</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tab7Grade3Body"></tbody>
                     </table>
                 </div>
             </div>
@@ -2293,6 +2399,8 @@
                         <option value="">선택하세요</option>
                         <option value="1">1학년</option>
                         <option value="2">2학년</option>
+                        <option value="3">3학년</option>
+                        
                     </select>
                 </div>
                 <div class="form-group">
@@ -2347,6 +2455,7 @@
                         <option value="">선택하세요</option>
                         <option value="1">1학년</option>
                         <option value="2">2학년</option>
+                        <option value="3">3학년</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -4051,32 +4160,42 @@
             });
         }
 
+        const GRADE_LEVELS = [1, 2, 3];
+
+        function setGradeSectionVisibility(prefix, grade) {
+            GRADE_LEVELS.forEach(level => {
+                const sectionId = prefix ? (prefix + 'Grade' + level + 'Section') : ('grade' + level + 'Section');
+                const section = document.getElementById(sectionId);
+                if (!section) return;
+                section.style.display = (grade === 'all' || grade === level) ? 'block' : 'none';
+            });
+        }
+
+        function getTabGradeBody(prefix, grade) {
+            return document.getElementById(prefix ? (prefix + 'Grade' + grade + 'Body') : ('grade' + grade + 'Body'));
+        }
+
         // ==================== 탭 1: 매주 배부 체크 ====================
         function renderStudents() {
-            const grade1Body = document.getElementById('grade1Body');
-            const grade2Body = document.getElementById('grade2Body');
+            const bodies = {};
+            const indexes = {};
 
-            grade1Body.innerHTML = '';
-            grade2Body.innerHTML = '';
+            GRADE_LEVELS.forEach(grade => {
+                bodies[grade] = getTabGradeBody('', grade);
+                indexes[grade] = 1;
+                if (bodies[grade]) bodies[grade].innerHTML = '';
+            });
 
             const sortedStudents = getSortedStudents();
-
-            let grade1Index = 1;
-            let grade2Index = 1;
 
             sortedStudents.forEach(student => {
                 if (!Array.isArray(student.subjects)) student.subjects = [];
                 const isChecked = (checkedStudents[currentWeek] && checkedStudents[currentWeek][student.id]) || {};
-
-                if (student.grade === 1) {
-                    const row = createStudentRow(student, isChecked, grade1Index);
-                    grade1Body.appendChild(row);
-                    grade1Index++;
-                } else {
-                    const row = createStudentRow(student, isChecked, grade2Index);
-                    grade2Body.appendChild(row);
-                    grade2Index++;
-                }
+                const body = bodies[student.grade];
+                if (!body) return;
+                const row = createStudentRow(student, isChecked, indexes[student.grade]);
+                body.appendChild(row);
+                indexes[student.grade]++;
             });
 
             updateStats();
@@ -4205,9 +4324,7 @@
             students.forEach(student => {
                 totalSubjects += student.subjects.length;
                 student.subjects.forEach(subject => {
-                    if (checkedStudents[currentWeek] &&
-                        checkedStudents[currentWeek][student.id] &&
-                        checkedStudents[currentWeek][student.id][subject]) {
+                    if (checkedStudents[currentWeek] && checkedStudents[currentWeek][student.id] && checkedStudents[currentWeek][student.id][subject]) {
                         completedSubjects++;
                     }
                 });
@@ -4221,35 +4338,21 @@
             document.getElementById('remainingCount').textContent = remaining;
             document.getElementById('completionRate').textContent = rate + '%';
 
-            let grade1TotalSubjects = 0;
-            let grade1CompletedSubjects = 0;
-            let grade2TotalSubjects = 0;
-            let grade2CompletedSubjects = 0;
-
+            const gradeStats = { 1: { total: 0, completed: 0 }, 2: { total: 0, completed: 0 }, 3: { total: 0, completed: 0 } };
             students.forEach(student => {
-                if (student.grade === 1) {
-                    grade1TotalSubjects += student.subjects.length;
-                    student.subjects.forEach(subject => {
-                        if (checkedStudents[currentWeek] &&
-                            checkedStudents[currentWeek][student.id] &&
-                            checkedStudents[currentWeek][student.id][subject]) {
-                            grade1CompletedSubjects++;
-                        }
-                    });
-                } else if (student.grade === 2) {
-                    grade2TotalSubjects += student.subjects.length;
-                    student.subjects.forEach(subject => {
-                        if (checkedStudents[currentWeek] &&
-                            checkedStudents[currentWeek][student.id] &&
-                            checkedStudents[currentWeek][student.id][subject]) {
-                            grade2CompletedSubjects++;
-                        }
-                    });
-                }
+                if (!gradeStats[student.grade]) return;
+                gradeStats[student.grade].total += student.subjects.length;
+                student.subjects.forEach(subject => {
+                    if (checkedStudents[currentWeek] && checkedStudents[currentWeek][student.id] && checkedStudents[currentWeek][student.id][subject]) {
+                        gradeStats[student.grade].completed++;
+                    }
+                });
             });
 
-            document.getElementById('grade1Stats').textContent = `${grade1CompletedSubjects}/${grade1TotalSubjects} 완료`;
-            document.getElementById('grade2Stats').textContent = `${grade2CompletedSubjects}/${grade2TotalSubjects} 완료`;
+            GRADE_LEVELS.forEach(grade => {
+                const el = document.getElementById('grade' + grade + 'Stats');
+                if (el) el.textContent = gradeStats[grade].completed + '/' + gradeStats[grade].total + ' 완료';
+            });
         }
 
         const SUBJECT_CAPACITY = 25;
@@ -4257,22 +4360,20 @@
 
         function updateSubjectOverview() {
             const filter = currentOverviewFilter;
-            const filtered = filter === 'all'
-                ? students
-                : students.filter(s => s.deliveryType === filter);
-
-            const grade1Subjects = {};
-            const grade2Subjects = {};
+            const filtered = filter === 'all' ? students : students.filter(s => s.deliveryType === filter);
+            const subjectMaps = { 1: {}, 2: {}, 3: {} };
 
             filtered.forEach(student => {
-                const map = student.grade === 1 ? grade1Subjects : grade2Subjects;
+                const map = subjectMaps[student.grade];
+                if (!map) return;
                 student.subjects.forEach(subj => {
                     map[subj] = (map[subj] || 0) + 1;
                 });
             });
 
-            renderSubjectBars('subjectBarsGrade1', grade1Subjects);
-            renderSubjectBars('subjectBarsGrade2', grade2Subjects);
+            GRADE_LEVELS.forEach(grade => {
+                renderSubjectBars('subjectBarsGrade' + grade, subjectMaps[grade]);
+            });
         }
 
         function filterSubjectOverview(type) {
@@ -4411,20 +4512,7 @@
         }
 
         function filterGrade(grade) {
-            const grade1Section = document.getElementById('grade1Section');
-            const grade2Section = document.getElementById('grade2Section');
-
-            if (grade === 'all') {
-                grade1Section.style.display = 'block';
-                grade2Section.style.display = 'block';
-            } else if (grade === 1) {
-                grade1Section.style.display = 'block';
-                grade2Section.style.display = 'none';
-            } else if (grade === 2) {
-                grade1Section.style.display = 'none';
-                grade2Section.style.display = 'block';
-            }
-
+            setGradeSectionVisibility('', grade);
             document.getElementById('classFilter').value = 'all';
             filterByClass();
         }
@@ -5099,33 +5187,30 @@
 
         // ==================== 탭 2: 신청/입금 현황 ====================
         function renderTab2() {
-            const grade1Body = document.getElementById('tab2Grade1Body');
-            const grade2Body = document.getElementById('tab2Grade2Body');
+            const bodies = {};
+            const indexes = {};
+            const counts = {};
 
-            grade1Body.innerHTML = '';
-            grade2Body.innerHTML = '';
-
-            const sortedStudents = getSortedStudents();
-
-            let grade1Index = 1;
-            let grade2Index = 1;
-            let grade1Count = 0;
-            let grade2Count = 0;
-
-            sortedStudents.forEach(student => {
-                if (student.grade === 1) {
-                    grade1Body.appendChild(createTab2Row(student, grade1Index));
-                    grade1Index++;
-                    grade1Count++;
-                } else {
-                    grade2Body.appendChild(createTab2Row(student, grade2Index));
-                    grade2Index++;
-                    grade2Count++;
-                }
+            GRADE_LEVELS.forEach(grade => {
+                bodies[grade] = getTabGradeBody('tab2', grade);
+                indexes[grade] = 1;
+                counts[grade] = 0;
+                if (bodies[grade]) bodies[grade].innerHTML = '';
             });
 
-            document.getElementById('tab2Grade1Stats').textContent = `${grade1Count}명`;
-            document.getElementById('tab2Grade2Stats').textContent = `${grade2Count}명`;
+            const sortedStudents = getSortedStudents();
+            sortedStudents.forEach(student => {
+                const body = bodies[student.grade];
+                if (!body) return;
+                body.appendChild(createTab2Row(student, indexes[student.grade]));
+                indexes[student.grade]++;
+                counts[student.grade]++;
+            });
+
+            GRADE_LEVELS.forEach(grade => {
+                const el = document.getElementById('tab2Grade' + grade + 'Stats');
+                if (el) el.textContent = counts[grade] + '명';
+            });
 
             updateTab2Stats();
             updateTab2ClassFilter();
@@ -5245,20 +5330,7 @@
         }
 
         function filterGradeTab2(grade) {
-            const g1 = document.getElementById('tab2Grade1Section');
-            const g2 = document.getElementById('tab2Grade2Section');
-
-            if (grade === 'all') {
-                g1.style.display = 'block';
-                g2.style.display = 'block';
-            } else if (grade === 1) {
-                g1.style.display = 'block';
-                g2.style.display = 'none';
-            } else if (grade === 2) {
-                g1.style.display = 'none';
-                g2.style.display = 'block';
-            }
-
+            setGradeSectionVisibility('tab2', grade);
             document.getElementById('tab2ClassFilter').value = 'all';
             filterByClassTab2();
         }
@@ -5481,34 +5553,31 @@
 
         // ==================== 탭 3: 학생 관리 ====================
         function renderTab3() {
-            const grade1Body = document.getElementById('tab3Grade1Body');
-            const grade2Body = document.getElementById('tab3Grade2Body');
+            const bodies = {};
+            const indexes = {};
+            const counts = {};
 
-            grade1Body.innerHTML = '';
-            grade2Body.innerHTML = '';
+            GRADE_LEVELS.forEach(grade => {
+                bodies[grade] = getTabGradeBody('tab3', grade);
+                indexes[grade] = 1;
+                counts[grade] = 0;
+                if (bodies[grade]) bodies[grade].innerHTML = '';
+            });
 
             const sortedStudents = getSortedStudents();
-
-            let grade1Index = 1;
-            let grade2Index = 1;
-            let grade1Count = 0;
-            let grade2Count = 0;
-
             sortedStudents.forEach(student => {
-                if (student.grade === 1) {
-                    grade1Body.appendChild(createTab3Row(student, grade1Index));
-                    grade1Index++;
-                    grade1Count++;
-                } else {
-                    grade2Body.appendChild(createTab3Row(student, grade2Index));
-                    grade2Index++;
-                    grade2Count++;
-                }
+                const body = bodies[student.grade];
+                if (!body) return;
+                body.appendChild(createTab3Row(student, indexes[student.grade]));
+                indexes[student.grade]++;
+                counts[student.grade]++;
             });
 
             document.getElementById('tab3StudentCount').textContent = students.length;
-            document.getElementById('tab3Grade1Count').textContent = `${grade1Count}명`;
-            document.getElementById('tab3Grade2Count').textContent = `${grade2Count}명`;
+            GRADE_LEVELS.forEach(grade => {
+                const el = document.getElementById('tab3Grade' + grade + 'Count');
+                if (el) el.textContent = counts[grade] + '명';
+            });
         }
 
         function createTab3Row(student, rowIndex) {
@@ -5769,7 +5838,7 @@
 
                         const gradeRaw = colMap.grade >= 0 ? String(row[colMap.grade] || '').trim() : '';
                         let grade = parseInt(gradeRaw.replace(/[^0-9]/g, '')) || 1;
-                        if (grade !== 1 && grade !== 2) {
+                        if (!GRADE_LEVELS.includes(grade)) {
                             invalidGrades.push({ name, gradeRaw, rowNum: idx + 2 });
                             grade = 1;
                         }
@@ -5933,7 +6002,7 @@
             }
 
             if (invalidGrades && invalidGrades.length > 0) {
-                warnings.push(`⚠️ 학년 값이 1/2학년이 아닌 ${invalidGrades.length}건을 1학년으로 처리했습니다. (행: ${invalidGrades.map(d => d.rowNum).join(', ')})`);
+                warnings.push(`⚠️ 학년 값이 1/2/3학년이 아닌 ${invalidGrades.length}건을 1학년으로 처리했습니다. (행: ${invalidGrades.map(d => d.rowNum).join(', ')})`);
             }
 
             if (warnings.length > 0) {
@@ -6994,33 +7063,34 @@
             const week = wrongAnswerWeek;
             if (!week) return;
 
-            const grade1Body = document.getElementById('tab7Grade1Body');
-            const grade2Body = document.getElementById('tab7Grade2Body');
-            grade1Body.innerHTML = '';
-            grade2Body.innerHTML = '';
+            const bodies = {};
+            const indexes = {};
+            const counts = {};
+            GRADE_LEVELS.forEach(grade => {
+                bodies[grade] = getTabGradeBody('tab7', grade);
+                indexes[grade] = 0;
+                counts[grade] = 0;
+                if (bodies[grade]) bodies[grade].innerHTML = '';
+            });
 
-            const englishStudents = getSortedStudents().filter(s =>
-                Array.isArray(s.subjects) && s.subjects.includes(subject)
-            );
-
-            let grade1Idx = 0, grade2Idx = 0;
+            const englishStudents = getSortedStudents().filter(s => Array.isArray(s.subjects) && s.subjects.includes(subject));
             let totalAssigned = 0, totalChecked = 0;
 
             englishStudents.forEach(student => {
                 const entry = getWrongAnswerEntry(subject, week, student.id);
                 if (entry.items.length > 0) totalAssigned++;
                 if (entry.checked) totalChecked++;
-
-                const tr = createTab7Row(student, entry, student.grade === 1 ? ++grade1Idx : ++grade2Idx);
-                if (student.grade === 1) {
-                    grade1Body.appendChild(tr);
-                } else {
-                    grade2Body.appendChild(tr);
-                }
+                const body = bodies[student.grade];
+                if (!body) return;
+                const rowIndex = ++indexes[student.grade];
+                counts[student.grade]++;
+                body.appendChild(createTab7Row(student, entry, rowIndex));
             });
 
-            document.getElementById('tab7Grade1Stats').textContent = `${grade1Idx}명`;
-            document.getElementById('tab7Grade2Stats').textContent = `${grade2Idx}명`;
+            GRADE_LEVELS.forEach(grade => {
+                const el = document.getElementById('tab7Grade' + grade + 'Stats');
+                if (el) el.textContent = counts[grade] + '명';
+            });
             document.getElementById('tab7TotalCount').textContent = englishStudents.length;
             document.getElementById('tab7AssignedCount').textContent = totalAssigned;
             document.getElementById('tab7CheckedCount').textContent = totalChecked;
@@ -7028,11 +7098,8 @@
             updateTab7ClassFilter(englishStudents);
 
             const wrapper = document.getElementById('tab-7');
-            if (wrongAnswerEditMode) {
-                wrapper.classList.add('wa-edit-mode');
-            } else {
-                wrapper.classList.remove('wa-edit-mode');
-            }
+            if (wrongAnswerEditMode) wrapper.classList.add('wa-edit-mode');
+            else wrapper.classList.remove('wa-edit-mode');
         }
 
         function createTab7Row(student, entry, rowIndex) {
@@ -7168,7 +7235,7 @@
 
         function searchStudentsTab7() {
             const searchTerm = document.getElementById('tab7SearchInput').value.toLowerCase();
-            document.querySelectorAll('#tab7Grade1Body tr, #tab7Grade2Body tr').forEach(row => {
+            document.querySelectorAll('#tab7Grade1Body tr, #tab7Grade2Body tr, #tab7Grade3Body tr').forEach(row => {
                 const name = (row.dataset.name || '').toLowerCase();
                 const cls = (row.dataset.class || '').toLowerCase();
                 row.style.display = (!searchTerm || name.includes(searchTerm) || cls.includes(searchTerm)) ? '' : 'none';
@@ -7176,8 +7243,7 @@
         }
 
         function filterGradeTab7(grade) {
-            document.getElementById('tab7Grade1Section').style.display = (grade === 'all' || grade === 1) ? '' : 'none';
-            document.getElementById('tab7Grade2Section').style.display = (grade === 'all' || grade === 2) ? '' : 'none';
+            setGradeSectionVisibility('tab7', grade);
         }
 
         function updateTab7ClassFilter(englishStudents) {
@@ -7196,7 +7262,7 @@
 
         function filterByClassTab7() {
             const selected = document.getElementById('tab7ClassFilter').value;
-            document.querySelectorAll('#tab7Grade1Body tr, #tab7Grade2Body tr').forEach(row => {
+            document.querySelectorAll('#tab7Grade1Body tr, #tab7Grade2Body tr, #tab7Grade3Body tr').forEach(row => {
                 row.style.display = (selected === 'all' || row.dataset.class === selected) ? '' : 'none';
             });
         }

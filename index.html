@@ -404,11 +404,29 @@
         }
 
         .grade-select-inline {
-            font-size: 13px;
-            padding: 2px 4px;
+            display: inline-flex;
+            gap: 4px;
+            padding: 3px;
             border: 2px solid #3498db;
-            border-radius: 4px;
-            outline: none;
+            border-radius: 8px;
+            background: #fff;
+            vertical-align: middle;
+        }
+
+        .grade-select-inline button {
+            border: none;
+            border-radius: 6px;
+            background: #eef6fd;
+            color: #1f2d3d;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .grade-select-inline button.active {
+            background: #3498db;
+            color: #fff;
         }
 
         .editable-delivery {
@@ -4831,6 +4849,15 @@
                 return;
             }
 
+            if (e.target.closest('.grade-select-inline')) {
+                return;
+            }
+
+            if (editingGradeStudentId) {
+                refreshStudentViews();
+                editingGradeStudentId = null;
+            }
+
             // 반 수정 클릭
             const classEl = e.target.closest('.editable-class');
             if (classEl && classEl.dataset.editClass) {
@@ -5010,6 +5037,18 @@
             return false;
         }
 
+        function refreshStudentViews() {
+            renderStudents();
+            renderTab2();
+            renderTab3();
+            if (currentTab === 5) renderTab5();
+            if (currentTab === 6) renderTab6();
+            if (currentTab === 7) renderTab7();
+            updateClassFilter();
+        }
+
+        let editingGradeStudentId = null;
+
         // 반 정보 수정
         let editingClass = null;
 
@@ -5017,36 +5056,30 @@
             const student = getStudentById(studentId);
             if (!student) return;
 
-            const select = document.createElement('select');
-            select.className = 'grade-select-inline';
-            [1, 2].forEach(g => {
-                const opt = document.createElement('option');
-                opt.value = g;
-                opt.textContent = g + '학년';
-                if (student.grade === g) opt.selected = true;
-                select.appendChild(opt);
+            editingGradeStudentId = studentId;
+
+            const picker = document.createElement('div');
+            picker.className = 'grade-select-inline';
+            GRADE_LEVELS.forEach(g => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = g + '학년';
+                if (student.grade === g) button.classList.add('active');
+                button.onclick = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (g !== student.grade) {
+                        student.grade = g;
+                        saveStudentsData();
+                        showSaveIndicator();
+                    }
+                    editingGradeStudentId = null;
+                    refreshStudentViews();
+                };
+                picker.appendChild(button);
             });
 
-            select.onchange = () => {
-                const newGrade = parseInt(select.value);
-                if (newGrade !== student.grade) {
-                    student.grade = newGrade;
-                    saveStudentsData();
-                    showSaveIndicator();
-                    renderStudents();
-                    renderTab2();
-                    renderTab3();
-                    if (currentTab === 5) renderTab5();
-                    if (currentTab === 6) renderTab6();
-                    updateClassFilter();
-                }
-            };
-            select.onblur = () => {
-                renderStudents();
-            };
-
-            gradeSpan.parentNode.replaceChild(select, gradeSpan);
-            select.focus();
+            gradeSpan.parentNode.replaceChild(picker, gradeSpan);
         }
 
         function showEditClass(studentId) {

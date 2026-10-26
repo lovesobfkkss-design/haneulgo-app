@@ -4096,6 +4096,13 @@
             return students.find(s => s.id === studentId);
         }
 
+        // 인라인 이벤트 핸들러(onclick="...") 인자용: JSON 문자열의 큰따옴표가 속성을 끊지 않도록 이스케이프
+        function toInlineArg(value) {
+            return JSON.stringify(value)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;');
+        }
+
         function makeSafeId(value) {
             return encodeURIComponent(String(value)).replace(/%/g, '_');
         }
@@ -4238,7 +4245,7 @@
                         ${student.subjects.map(subj =>
                             `<span class="subject-tag" data-student-id="${encodeURIComponent(student.id)}" data-subject="${encodeURIComponent(subj)}">${subj}</span>`
                         ).join('')}
-                        <button type="button" class="subject-picker-btn" onclick="openSubjectPicker(${JSON.stringify(student.id)})">과목 선택</button>
+                        <button type="button" class="subject-picker-btn" onclick="openSubjectPicker(${toInlineArg(student.id)})">과목 선택</button>
                         <button type="button" class="add-subject-btn" data-context="tab1" data-student-id="${encodeURIComponent(student.id)}">+ 직접 추가</button>
                     </div>
                 `;
@@ -4255,7 +4262,7 @@
                 : '';
 
             const smsButtonHtml = getStudentParentPhones(student).length > 0
-                ? `<button class="sms-btn" onclick="openSMSApp(${JSON.stringify(student.id)})" title="학부모에게 문자 보내기">문자</button>`
+                ? `<button class="sms-btn" onclick="openSMSApp(${toInlineArg(student.id)})" title="학부모에게 문자 보내기">문자</button>`
                 : '';
 
             const gradeHtml = `<span class="editable-grade" data-edit-grade="${encodeURIComponent(student.id)}" title="클릭하여 학년 수정">${student.grade}학년</span>`;
@@ -4267,7 +4274,7 @@
                         <input type="checkbox"
                                id="${makeSubjectCheckboxId(student.id, subj)}"
                                ${isChecked && isChecked[subj] ? 'checked' : ''}
-                               onchange="toggleCheck(${JSON.stringify(student.id)}, ${JSON.stringify(subj)})">
+                               onchange="toggleCheck(${toInlineArg(student.id)}, ${toInlineArg(subj)})">
                         <label for="${makeSubjectCheckboxId(student.id, subj)}">${subj}</label>
                     </div>
                 `).join('')
@@ -5526,7 +5533,7 @@
                 <td><div class="subjects">${subjectsHtml || '<span style="color:#999;">과목 없음</span>'}</div></td>
                 <td><div class="schedule-summary">${formatPickupSchedule(student)}</div></td>
                 <td class="phone">${getStudentParentPhonesDisplay(student)}</td>
-                <td><div class="inline-actions"><button type="button" class="btn btn-secondary" onclick="openPickupScheduleModal(${JSON.stringify(student.id)})">수정</button></div></td>
+                <td><div class="inline-actions"><button type="button" class="btn btn-secondary" onclick="openPickupScheduleModal(${toInlineArg(student.id)})">수정</button></div></td>
             ` : `
                 <td>${rowIndex}</td>
                 <td class="student-name">${student.name}</td>
@@ -5534,7 +5541,7 @@
                 <td>${student.class}</td>
                 <td><div class="subjects">${subjectsHtml || '<span style="color:#999;">과목 없음</span>'}</div></td>
                 <td class="phone">${getStudentParentPhonesDisplay(student)}</td>
-                <td><div class="inline-actions"><button type="button" class="btn btn-primary" onclick="openPickupScheduleModal(${JSON.stringify(student.id)})">일정 입력</button></div></td>
+                <td><div class="inline-actions"><button type="button" class="btn btn-primary" onclick="openPickupScheduleModal(${toInlineArg(student.id)})">일정 입력</button></div></td>
             `;
             return tr;
         }
@@ -5554,9 +5561,9 @@
                 <td>${entry.createdAt ? formatDateShort(entry.createdAt) : '-'}</td>
                 <td>
                     <div class="inline-actions">
-                        <button type="button" class="btn btn-secondary" onclick="openWaitlistModal(${JSON.stringify(entry.id)})">수정</button>
-                        <button type="button" class="btn btn-success" onclick="promoteWaitlistEntry(${JSON.stringify(entry.id)})">확정 이동</button>
-                        <button type="button" class="btn btn-danger" onclick="deleteWaitlistEntry(${JSON.stringify(entry.id)})">삭제</button>
+                        <button type="button" class="btn btn-secondary" onclick="openWaitlistModal(${toInlineArg(entry.id)})">수정</button>
+                        <button type="button" class="btn btn-success" onclick="promoteWaitlistEntry(${toInlineArg(entry.id)})">확정 이동</button>
+                        <button type="button" class="btn btn-danger" onclick="deleteWaitlistEntry(${toInlineArg(entry.id)})">삭제</button>
                     </div>
                 </td>
             `;
@@ -5626,7 +5633,7 @@
                         ${student.subjects.map(subj =>
                             `<span class="subject-tag" data-student-id="${encodeURIComponent(student.id)}" data-subject="${encodeURIComponent(subj)}">${subj}</span>`
                         ).join('')}
-                        <button type="button" class="subject-picker-btn" onclick="openSubjectPicker(${JSON.stringify(student.id)})">과목 선택</button>
+                        <button type="button" class="subject-picker-btn" onclick="openSubjectPicker(${toInlineArg(student.id)})">과목 선택</button>
                         <button type="button" class="add-subject-btn" data-context="tab3" data-student-id="${encodeURIComponent(student.id)}">+ 직접 추가</button>
                     </div>
                 `;
@@ -5660,9 +5667,9 @@
                 <td>
                     <span class="code-pill">${student.accessCode || '-'}</span>
                     <button class="btn btn-secondary" style="padding:4px 8px; font-size:11px; margin-left:6px;" type="button"
-                        onclick="copyAccessCode(${JSON.stringify(student.id)})">복사</button>
+                        onclick="copyAccessCode(${toInlineArg(student.id)})">복사</button>
                     <button class="btn btn-secondary" style="padding:4px 8px; font-size:11px; margin-left:6px;" type="button"
-                        onclick="regenerateAccessCode(${JSON.stringify(student.id)})">재생성</button>
+                        onclick="regenerateAccessCode(${toInlineArg(student.id)})">재생성</button>
                 </td>
                 <td>${(() => {
                     const remaining = daysUntilExpiry(student);

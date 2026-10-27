@@ -1595,6 +1595,414 @@
             margin-left: 4px;
         }
 
+        /* ==================== 메인: 발송·배부 한 화면 ==================== */
+        .session-shell {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 18px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+
+        .session-shell .session-shell-header,
+        .session-shell .session-row {
+            margin-bottom: 0;
+        }
+
+        .session-shell .session-shell-subtitle,
+        .session-shell .session-current {
+            display: none;
+        }
+
+        .session-shell .session-pill {
+            padding: 4px 12px;
+        }
+
+        .admin-bar {
+            display: none;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            font-size: 13px;
+            color: #27ae60;
+            margin-bottom: 8px;
+        }
+
+        body.is-admin .admin-bar {
+            display: flex;
+        }
+
+        body.is-admin:not(.show-admin-settings) #adminAuthCard,
+        body.is-admin:not(.show-admin-settings) #codeSettingsCard,
+        body:not(.is-admin) #codeSettingsCard {
+            display: none;
+        }
+
+        .main-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .main-pills .ship-date-pill.all-pill {
+            border-style: dashed;
+        }
+
+        .main-pills .add-batch-pill {
+            border: 2px dashed #3498db;
+            color: #3498db;
+            background: white;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .main-dayhead {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 4px 12px;
+            margin-bottom: 8px;
+        }
+
+        .main-dayhead:empty {
+            display: none;
+        }
+
+        .main-filterbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        .main-filterbar #mainSearch,
+        .main-filterbar #mainGradeFilter {
+            width: 170px;
+            min-width: 0;
+            flex: 0 0 auto;
+            margin: 0;
+        }
+
+        .main-filterbar #mainGradeFilter {
+            width: 110px;
+        }
+
+        .main-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .main-chip {
+            border: 1px solid #d0d7de;
+            background: white;
+            border-radius: 16px;
+            padding: 4px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            color: #2c3e50;
+        }
+
+        .main-chip.active {
+            background: #2c3e50;
+            border-color: #2c3e50;
+            color: white;
+        }
+
+        .main-chip.alert:not(.active) {
+            border-color: #e74c3c;
+            color: #c0392b;
+            font-weight: 700;
+        }
+
+        .main-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-left: auto;
+        }
+
+        .main-table-wrap {
+            border-top: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 70vh;
+            overflow: auto;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .main-table th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f1f4f8;
+            color: #1f3a68;
+            text-align: left;
+            padding: 8px 6px;
+            white-space: nowrap;
+        }
+
+        .main-table td {
+            padding: 7px 6px;
+            border-top: 1px solid #eef0f3;
+            vertical-align: middle;
+        }
+
+        .main-table td.nowrap {
+            white-space: nowrap;
+        }
+
+        .main-table tbody tr:hover td {
+            background: #f8fbff;
+        }
+
+        .main-table tr.ship-row-changed td {
+            background: #fff3d6;
+        }
+
+        .main-table tr.ship-row-done td {
+            background: #eefaf4;
+        }
+
+        .main-table .status-toggle {
+            margin: 0;
+        }
+
+        .main-name {
+            font-weight: 700;
+            color: #1f4e9c;
+            cursor: pointer;
+            white-space: nowrap;
+            text-decoration: underline dotted;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            border: none;
+        }
+
+        .type-badge.delivery { background: #efe3f7; color: #8e44ad; }
+        .type-badge.pickup { background: #dff5ef; color: #138d75; }
+        .type-badge.none { background: #fdecea; color: #c0392b; }
+
+        .bchip {
+            display: inline-block;
+            font-size: 11px;
+            border-radius: 6px;
+            padding: 1px 6px;
+            margin: 1px 2px 1px 0;
+            background: #eef2f8;
+            color: #2c3e50;
+            white-space: nowrap;
+        }
+
+        .bchip.done { background: #d5f5e3; color: #1e8449; }
+        .bchip.changed { background: #fdebd0; color: #b9770e; }
+        .bchip.excluded { background: #eee; color: #888; text-decoration: line-through; }
+
+        .wa-mini {
+            font-size: 12px;
+            white-space: nowrap;
+            cursor: pointer;
+            color: #2c3e50;
+        }
+
+        .main-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 14px;
+        }
+
+        .main-footer details > summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #2c3e50;
+            padding: 6px 0;
+        }
+
+        .main-legacy {
+            font-size: 12px;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .main-legacy select {
+            font-size: 12px;
+            padding: 2px 4px;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 440px;
+            max-width: 100%;
+            height: 100%;
+            background: white;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.18);
+            z-index: 900;
+            transform: translateX(105%);
+            transition: transform 0.2s ease;
+            overflow-y: auto;
+        }
+
+        .drawer.open {
+            transform: none;
+        }
+
+        .drawer-head {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #1f3a68;
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drawer-head .drawer-name {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .drawer-head .drawer-sub {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .drawer-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .drawer-section {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eef0f3;
+        }
+
+        .drawer-section h4 {
+            font-size: 13px;
+            color: #1f3a68;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-grid {
+            display: grid;
+            grid-template-columns: 84px 1fr;
+            gap: 6px 8px;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .drawer-grid > label {
+            color: #666;
+        }
+
+        .drawer input[type="text"],
+        .drawer input[type="tel"],
+        .drawer input[type="number"],
+        .drawer input[type="date"],
+        .drawer select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccd3dc;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .drawer-toggles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .toggle-pill {
+            border: 1px solid #ccd3dc;
+            background: white;
+            border-radius: 14px;
+            padding: 4px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .toggle-pill.on {
+            background: #27ae60;
+            border-color: #27ae60;
+            color: white;
+        }
+
+        .drawer-batch {
+            border: 1px solid #e3e8ef;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .drawer-batch.current {
+            border: 2px solid #3498db;
+        }
+
+        .drawer-batch .row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .wa-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #fff3d6;
+            border-radius: 10px;
+            padding: 2px 8px;
+            margin: 2px;
+            font-size: 12px;
+        }
+
+        .wa-chip button {
+            background: none;
+            border: none;
+            color: #c0392b;
+            cursor: pointer;
+            font-size: 13px;
+            padding: 0;
+        }
+
+        @media (max-width: 768px) {
+            .drawer { width: 100%; }
+            .main-filterbar #mainSearch { width: 100%; }
+            .main-actions { margin-left: 0; }
+        }
+
         /* ==================== 반응형 ==================== */
         @media (max-width: 768px) {
             body {
@@ -1812,6 +2220,12 @@
 
         <div id="firebaseStatus" class="firebase-status" style="display: none;"></div>
 
+        <div class="admin-bar" id="adminBar">
+            <span>✓ 관리자 모드</span>
+            <button class="btn btn-secondary ship-btn-sm" type="button" onclick="document.body.classList.toggle('show-admin-settings')">설정</button>
+            <button class="btn btn-secondary ship-btn-sm" type="button" onclick="adminLogout()">로그아웃</button>
+        </div>
+
         <div class="management-card" id="adminAuthCard">
             <h3>관리자 로그인</h3>
             <p>관리자만 학생 관리/배부 체크를 수정할 수 있습니다.</p>
@@ -1904,12 +2318,8 @@
         <div id="mainAppContent">
         <!-- 탭 네비게이션 -->
         <div class="tab-nav">
-            <button class="tab-btn active" onclick="switchTab(1)">배부 체크</button>
-            <button class="tab-btn" onclick="switchTab(2)">신청/입금</button>
-            <button class="tab-btn" onclick="switchTab(5)">택배/픽업<span id="shipTabBadge" class="ship-tab-badge" style="display:none;"></span></button>
-            <button class="tab-btn" onclick="switchTab(6)">예약대기/픽업일정</button>
-            <button class="tab-btn" onclick="switchTab(7)">영어 오답 배부</button>
-            <button class="tab-btn" onclick="switchTab(3)">학생 관리</button>
+            <button class="tab-btn active" onclick="switchTab(8)">발송·배부<span id="shipTabBadge" class="ship-tab-badge" style="display:none;"></span></button>
+            <button class="tab-btn" onclick="switchTab(3)">학생 등록·관리</button>
             <button class="tab-btn" onclick="switchTab(4)">학부모 조회</button>
         </div>
 
@@ -1942,8 +2352,57 @@
             </div>
         </div>
 
-        <!-- ==================== 탭 1: 매주 배부 체크 ==================== -->
-        <div class="tab-content active" id="tab-1">
+        <!-- ==================== 메인: 발송·배부 한 화면 ==================== -->
+        <div class="tab-content active" id="tab-8">
+            <div class="main-pills" id="mainDatePills"></div>
+            <div class="main-dayhead" id="mainDayHead"></div>
+            <div id="mainChanges"></div>
+            <div class="main-filterbar">
+                <input type="text" id="mainSearch" class="search-box" placeholder="이름·반·과목 검색" oninput="renderMain()">
+                <select id="mainGradeFilter" class="search-box" onchange="renderMain()" style="width:auto;">
+                    <option value="all">전체 학년</option>
+                    <option value="1">1학년</option>
+                    <option value="2">2학년</option>
+                    <option value="3">3학년</option>
+                </select>
+                <div class="main-chips" id="mainFilterChips"></div>
+                <div class="main-actions" id="mainActions"></div>
+            </div>
+            <div class="table-wrapper main-table-wrap">
+                <table class="main-table">
+                    <thead id="mainHead"></thead>
+                    <tbody id="mainBody"></tbody>
+                </table>
+            </div>
+            <div class="main-footer">
+                <details id="mainWaitlistDetails">
+                    <summary>예약대기 <span id="mainWaitlistCount"></span></summary>
+                    <div id="mainWaitlist"></div>
+                </details>
+                <details id="mainBatchDetails">
+                    <summary>배부 회차 관리 <span id="mainBatchCount"></span></summary>
+                    <div id="mainBatchList"></div>
+                </details>
+                <details>
+                    <summary>학생별 수령 기록 <span class="ship-memo" id="mainHistorySummary"></span></summary>
+                    <div id="mainHistory"></div>
+                </details>
+                <div class="main-legacy">
+                    예전 화면:
+                    <select onchange="if (this.value) { switchTab(parseInt(this.value, 10)); this.value = ''; }">
+                        <option value="">선택</option>
+                        <option value="1">주차별 배부 체크</option>
+                        <option value="2">신청/입금 전체 표</option>
+                        <option value="5">택배/픽업 (이전 발송 일정)</option>
+                        <option value="6">예약대기/픽업일정</option>
+                        <option value="7">영어 오답 전체 표</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 탭 1: 매주 배부 체크 (예전 화면) ==================== -->
+        <div class="tab-content" id="tab-1">
             <div class="auth-note" id="adminCheckNote" style="margin-bottom:10px; text-align:center;">관리자 모드에서만 체크할 수 있습니다.</div>
             <div class="week-info">
                 <div class="week-selector">
@@ -2920,6 +3379,15 @@
         </div>
     </div>
 
+    <!-- 학생 상세 패널 -->
+    <div id="studentDrawer" class="drawer" aria-hidden="true">
+        <div class="drawer-head">
+            <div id="drawerTitle"></div>
+            <button type="button" class="drawer-close" onclick="closeStudentDrawer()">&times;</button>
+        </div>
+        <div id="drawerBody"></div>
+    </div>
+
     <!-- 배송지 입력 모달 -->
     <div id="shipAddressModal" class="modal">
         <div class="modal-content">
@@ -3312,7 +3780,7 @@
         let editMode = false;
         let editModeTab3 = false;
         let editingStudent = null;
-        let currentTab = 1;
+        let currentTab = 8;
         let currentSubjectPickerStudentId = null;
         let parentViewStudents = [];
         let parentCheckedByStudent = {};
@@ -3453,7 +3921,7 @@
 
         // ==================== 탭 전환 ====================
         // 탭 버튼 순서와 탭 ID 매핑
-        const tabButtonOrder = [1, 2, 5, 6, 7, 3, 4];
+        const tabButtonOrder = [8, 3, 4];
 
         function switchTab(tabId, silent = false) {
             if (!isAdmin && tabId === 4) {
@@ -3490,7 +3958,11 @@
                 renderTab6();
             } else if (tabId === 7) {
                 renderTab7();
+            } else if (tabId === 8) {
+                renderMain();
             }
+            if (tabId !== 8) closeStudentDrawer();
+            updateSubjectOverviewVisibility();
         }
 
         async function bootstrapExamSessions() {
@@ -3622,7 +4094,7 @@
                 if (currentTab === 3) renderTab3();
                 if (currentTab === 5) renderTab5();
                 if (currentTab === 6) renderTab6();
-                if (currentTab === 7) renderTab7();
+                if (currentTab === 7) renderTab7(); scheduleMainRender();
                 renderParentView();
             }
         }
@@ -3739,6 +4211,7 @@
             setupParentView();
             setupCodeTtl();
             setupAdminPassword();
+            switchTab(isAdmin ? 8 : 4, true);
 
             bootstrapExamSessions().then(() => {
                 if (sessionExists()) {
@@ -3789,7 +4262,7 @@
                     if (currentTab === 3) renderTab3();
                     if (currentTab === 5) renderTab5();
                     if (currentTab === 6) renderTab6();
-                    if (currentTab === 7) renderTab7();
+                    if (currentTab === 7) renderTab7(); scheduleMainRender();
                     updateShipTabBadge();
                     console.log("🔄 실시간 동기화: 학생 데이터 업데이트됨");
                 }
@@ -3822,7 +4295,7 @@
                 const normalized = savedData || {};
                 if (JSON.stringify(wrongAnswerData) !== JSON.stringify(normalized)) {
                     wrongAnswerData = normalized;
-                    if (currentTab === 7) renderTab7();
+                    if (currentTab === 7) renderTab7(); scheduleMainRender();
                     console.log("🔄 실시간 동기화: 오답 데이터 업데이트됨");
                 }
             });
@@ -3927,7 +4400,7 @@
                     loadShipmentData();
                 });
                 updateAdminCheckNote();
-                updateSubjectOverviewVisibility();
+                switchTab(8, true);
                 return;
             }
             showAdminAuthAlert('비밀번호가 틀렸습니다.', 'error');
@@ -4019,6 +4492,8 @@
         }
 
         function updateAdminCheckNote() {
+            document.body.classList.toggle('is-admin', isAdmin);
+            if (!isAdmin) document.body.classList.remove('show-admin-settings');
             const note = document.getElementById('adminCheckNote');
             if (!note) return;
             note.textContent = isAdmin
@@ -4696,6 +5171,7 @@
 
         // ==================== 탭 1: 매주 배부 체크 ====================
         function renderStudents() {
+            scheduleMainRender();
             const bodies = {};
             const indexes = {};
 
@@ -4938,7 +5414,7 @@
 
         function updateSubjectOverviewVisibility() {
             const el = document.getElementById('subjectOverview');
-            if (el) el.style.display = isAdmin ? '' : 'none';
+            if (el) el.style.display = isAdmin && currentTab === 1 ? '' : 'none';
         }
 
         function cycleDeliveryType(el) {
@@ -5550,7 +6026,7 @@
             renderTab3();
             if (currentTab === 5) renderTab5();
             if (currentTab === 6) renderTab6();
-            if (currentTab === 7) renderTab7();
+            if (currentTab === 7) renderTab7(); scheduleMainRender();
             updateClassFilter();
         }
 
@@ -6777,6 +7253,7 @@
         }
 
         function saveStudentsData() {
+            scheduleMainRender();
             if (useFirebase && database) {
                 const studentsById = buildStudentsById();
                 const codeIndex = buildCodeIndex();
@@ -7598,6 +8075,7 @@
             const finish = () => {
                 updateShipTabBadge();
                 if (currentTab === 5) renderTab5();
+                scheduleMainRender();
             };
             shipmentData = { batches: {}, status: {} };
             if (!sessionExists()) {
@@ -7839,7 +8317,17 @@
             // 회차 목록
             const batches = getBatchList();
             document.getElementById('shipBatchCount').textContent = `(${batches.length}개)`;
-            document.getElementById('shipBatchList').innerHTML = batches.length === 0
+            document.getElementById('shipBatchList').innerHTML = buildBatchListHtml(assignments);
+
+            renderShipDayView(assignments, selectedShipDate);
+            renderShipHistory(history);
+            updateShipTabBadge();
+            scheduleMainRender();
+        }
+
+        function buildBatchListHtml(assignments) {
+            const batches = getBatchList();
+            return batches.length === 0
                 ? '<p class="info-note">아직 배부 회차가 없습니다.</p>'
                 : batches.map(batch => {
                     const targetCount = assignments.filter(a => a.batch === batch && !a.excluded).length;
@@ -7852,10 +8340,6 @@
                         <button type="button" class="btn btn-secondary ship-btn-sm" data-ship-action="edit-batch" data-batch-id="${escapeShipHtml(batch.id)}">수정</button>
                     </div>`;
                 }).join('');
-
-            renderShipDayView(assignments, selectedShipDate);
-            renderShipHistory(history);
-            updateShipTabBadge();
         }
 
         function renderShipDayView(assignments, date) {
@@ -7910,9 +8394,25 @@
                     &nbsp;|&nbsp; 🙋 픽업 ${pickupRows.length}명 (수령 ${countRows(pickupRows, 'done')}/${pickupRows.length})
                 </div>`;
 
-            // 1. 변경자 먼저
+            html += buildShipChangesHtml(changes, 'shipChanges');
+
+            if (unassignedRows.length > 0) {
+                html += buildShipTable('unassigned', `⚠ 수령 방식 미지정 ${unassignedRows.length}명 · 기본 방식을 정하거나 '이번 회차만 변경'으로 지정하세요`, unassignedRows);
+            }
+            if (date === SHIP_NO_DATE || batchesOnDate.some(b => b.deliveryDate === date) || deliveryRows.length > 0) {
+                html += buildShipTable('delivery', `📦 택배 발송 명단 ${deliveryRows.length}명`, deliveryRows);
+            }
+            if (date === SHIP_NO_DATE || batchesOnDate.some(b => b.pickupDate === date) || pickupRows.length > 0) {
+                html += buildShipTable('pickup', `🙋 픽업 명단 ${pickupRows.length}명`, pickupRows);
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 변경자 카드: 이 날짜에 걸린 회차에서 '이번 회차만' 바뀐 학생 (포장 전에 먼저 확인)
+        function buildShipChangesHtml(changes, id) {
             if (changes.length > 0) {
-                html += `<div class="ship-changes" id="shipChanges">
+                return `<div class="ship-changes" id="${id}">
                     <div class="ship-changes-title">⚠ 이번 회차 변경자 ${changes.length}건 · 포장 전에 먼저 확인하세요</div>
                     ${changes.map(a => {
                         const addrText = a.status.addr ? ` · 이번 회차 배송지: ${escapeShipHtml(`${a.status.addr.addr || ''} ${a.status.addr.addr2 || ''}`.trim())}` : '';
@@ -7933,20 +8433,9 @@
                     }).join('')}
                 </div>`;
             } else {
-                html += `<div class="ship-changes empty" id="shipChanges">✓ 이 날짜에 걸린 회차의 변경자가 없습니다.</div>`;
+                return `<div class="ship-changes empty" id="${id}">✓ 이 날짜에 걸린 회차의 변경자가 없습니다.</div>`;
             }
 
-            if (unassignedRows.length > 0) {
-                html += buildShipTable('unassigned', `⚠ 수령 방식 미지정 ${unassignedRows.length}명 · 기본 방식을 정하거나 '이번 회차만 변경'으로 지정하세요`, unassignedRows);
-            }
-            if (date === SHIP_NO_DATE || batchesOnDate.some(b => b.deliveryDate === date) || deliveryRows.length > 0) {
-                html += buildShipTable('delivery', `📦 택배 발송 명단 ${deliveryRows.length}명`, deliveryRows);
-            }
-            if (date === SHIP_NO_DATE || batchesOnDate.some(b => b.pickupDate === date) || pickupRows.length > 0) {
-                html += buildShipTable('pickup', `🙋 픽업 명단 ${pickupRows.length}명`, pickupRows);
-            }
-
-            container.innerHTML = html;
         }
 
         function buildShipTable(kind, title, rows) {
@@ -7993,8 +8482,9 @@
             </div>`;
         }
 
-        function renderShipHistory(history) {
-            const container = document.getElementById('shipHistory');
+        function renderShipHistory(history, containerId = 'shipHistory') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
             const entries = [...history.perStudent.values()].sort((x, y) => {
                 const sorted = getSortedStudents();
                 return sorted.indexOf(x.student) - sorted.indexOf(y.student);
@@ -8137,6 +8627,8 @@
             };
             // 날짜가 바뀐 회차는 새 날짜를 바로 보여준다
             selectedShipDate = deliveryDate || pickupDate || SHIP_NO_DATE;
+            mainMode = 'date';
+            mainModeAuto = false;
             saveShipmentData();
             closeBatchModal();
             renderShipments();
@@ -8629,9 +9121,506 @@
             closeCourierExportModal();
         }
 
+        // ==================== 메인: 발송·배부 한 화면 ====================
+        // 위: 전체 학생 / 발송 날짜 버튼 → 가운데: 한 장의 표(필터) → 학생 이름 클릭: 오른쪽 상세 패널.
+        // 날짜 모드의 표는 그 날짜에 걸린 회차의 대상 학생(이번 회차 변경 반영), 전체 모드는 모든 학생의 기본 정보.
+        let mainMode = 'all';            // 'all' | 'date'
+        let mainModeAuto = true;         // 사용자가 직접 고르기 전에는 가까운 발송일을 자동으로 연다
+        let mainFilter = 'all';
+        let drawerStudentId = null;
+        let mainRenderQueued = false;
+
+        const WA_SUBJECT = '영어';
+
+        function scheduleMainRender() {
+            if (mainRenderQueued) return;
+            mainRenderQueued = true;
+            setTimeout(() => {
+                mainRenderQueued = false;
+                if (currentTab === 8) renderMain();
+                else if (drawerStudentId) renderDrawer();
+            }, 0);
+        }
+
+        function shortSubject(subject) {
+            return String(subject).replace(/^\d학년\s*/, '');
+        }
+
+        function isEnglishStudent(student) {
+            return (student.subjects || []).some(subj => subj.includes('영어'));
+        }
+
+        function getMainWeek() {
+            const date = mainMode === 'date' && selectedShipDate && selectedShipDate !== SHIP_NO_DATE ? selectedShipDate : getShipToday();
+            return getWeekKeyFromDate(date);
+        }
+
+        function peekWrongAnswer(studentId, week = getMainWeek()) {
+            const entry = ((wrongAnswerData[WA_SUBJECT] || {})[week] || {})[studentId];
+            return { items: Array.isArray(entry && entry.items) ? entry.items : [], checked: !!(entry && entry.checked) };
+        }
+
+        function mainStudentMatches(student) {
+            const q = (document.getElementById('mainSearch').value || '').trim().toLowerCase();
+            const grade = document.getElementById('mainGradeFilter').value;
+            if (grade !== 'all' && String(student.grade) !== grade) return false;
+            if (!q) return true;
+            return [student.name, student.class, `${student.grade}학년`, ...(student.subjects || [])].some(v => String(v || '').toLowerCase().includes(q));
+        }
+
+        // 날짜 모드 행: 학생 × 수령 방식 (같은 날 같은 방식의 회차는 한 줄로)
+        function buildMainDateRows(assignments, date) {
+            const map = new Map();
+            assignments.filter(a => !a.excluded && (date === SHIP_NO_DATE ? !a.date : a.date === date)).forEach(a => {
+                const key = `${a.student.id}|${a.type}`;
+                if (!map.has(key)) map.set(key, { student: a.student, type: a.type, items: [] });
+                map.get(key).items.push(a);
+            });
+            const order = getSortedStudents();
+            const typeRank = { '택배': 0, '픽업': 1, '': 2 };
+            return [...map.values()].sort((x, y) => (typeRank[x.type] - typeRank[y.type]) || (order.indexOf(x.student) - order.indexOf(y.student)));
+        }
+
+        const MAIN_FILTERS = {
+            date: [['all', '전체'], ['택배', '📦 택배'], ['픽업', '🙋 픽업'], ['changed', '⚠ 변경'], ['todo', '미완료'], ['noaddr', '주소 미입력'], ['unpaid', '미입금'], ['english', '영어']],
+            all: [['all', '전체'], ['택배', '📦 택배'], ['픽업', '🙋 픽업'], ['none', '수령 미지정'], ['noaddr', '주소 미입력'], ['unpaid', '미입금'], ['english', '영어']]
+        };
+
+        function mainRowPasses(row, filter) {
+            const s = row.student;
+            switch (filter) {
+                case '택배': case '픽업': return row.type === filter;
+                case 'none': return !row.type;
+                case 'changed': return row.items.some(a => a.overridden || a.status.warning);
+                case 'todo': return !!row.type && !row.items.every(a => a.status.done);
+                case 'noaddr': return row.type === '택배' && !hasShipAddress(s, row.items);
+                case 'unpaid': return !s.paymentConfirmed;
+                case 'english': return isEnglishStudent(s);
+                default: return true;
+            }
+        }
+
+        function renderMain() {
+            if (!document.getElementById('tab-8')) return;
+            const assignments = buildShipAssignments();
+            const dates = getShipDateKeys(assignments);
+            const today = getShipToday();
+            if (mainModeAuto) {
+                const upcoming = dates.find(d => d !== SHIP_NO_DATE && d >= today);
+                if (upcoming) { mainMode = 'date'; selectedShipDate = upcoming; mainModeAuto = false; }
+            }
+            if (mainMode === 'date' && !dates.includes(selectedShipDate)) mainMode = 'all';
+            const isDate = mainMode === 'date';
+            const date = selectedShipDate;
+
+            // 날짜 버튼
+            const pills = [`<button type="button" class="ship-date-pill all-pill ${isDate ? '' : 'active'}" data-main-action="all">
+                <strong>전체 학생</strong><br>${students.length}명 · 입금·수령 기본</button>`];
+            dates.forEach(d => {
+                const onDate = getBatchList().filter(b => isBatchOnDate(b, d));
+                const kinds = d === SHIP_NO_DATE ? ['일정 미정'] : [
+                    onDate.some(b => b.deliveryDate === d) ? '📦 택배' : '', onDate.some(b => b.pickupDate === d) ? '🙋 픽업' : ''].filter(Boolean);
+                const n = getShipChangesForDate(assignments, d).length;
+                const cls = ['ship-date-pill', isDate && d === date ? 'active' : '', d !== SHIP_NO_DATE && d < today ? 'past' : ''].filter(Boolean).join(' ');
+                pills.push(`<button type="button" class="${cls}" data-main-action="date" data-date="${d}">
+                    <strong>${formatShipDate(d)}</strong>${getShipDdayHtml(d)}<br>${kinds.join(' · ')}${n ? ` <span class="ship-pill-alert">⚠ ${n}</span>` : ''}</button>`);
+            });
+            pills.push('<button type="button" class="add-batch-pill" onclick="openBatchModal()">+ 배부 회차</button>');
+            document.getElementById('mainDatePills').innerHTML = pills.join('');
+
+            // 행
+            let rows;
+            if (isDate) {
+                rows = buildMainDateRows(assignments, date);
+            } else {
+                rows = getSortedStudents().map(s => ({ student: s, type: s.deliveryType || '', items: assignments.filter(a => a.student === s) }));
+            }
+            rows = rows.filter(r => mainStudentMatches(r.student));
+
+            // 머리 줄
+            const head = document.getElementById('mainDayHead');
+            const countRows = (list, f) => list.filter(r => r.items.every(a => a.status[f])).length;
+            if (isDate) {
+                const dRows = rows.filter(r => r.type === '택배'), pRows = rows.filter(r => r.type === '픽업');
+                const batchSummary = getBatchList().filter(b => isBatchOnDate(b, date)).map(b => {
+                    const kinds = date === SHIP_NO_DATE ? [] : [b.deliveryDate === date ? '택배' : '', b.pickupDate === date ? '픽업' : ''].filter(Boolean);
+                    return `<span class="ship-memo" style="cursor:pointer; text-decoration:underline;" data-ship-action="edit-batch" data-batch-id="${escapeShipHtml(b.id)}">${escapeShipHtml(b.name)}(${escapeShipHtml([...new Set(b.subjects.map(shortSubject))].join('·'))}) ${kinds.join('·')} ✎</span>`;
+                }).join(' / ');
+                head.innerHTML = `<span class="ship-day-title">${formatShipDate(date)}</span>${getShipDdayHtml(date)}
+                    <span class="ship-progress" style="margin:0;">📦 택배 ${dRows.length}명 (포장 ${countRows(dRows, 'packed')} · 발송 ${countRows(dRows, 'done')}) · 🙋 픽업 ${pRows.length}명 (수령 ${countRows(pRows, 'done')})</span>
+                    <span class="ship-day-sub">${batchSummary}</span>`;
+                document.getElementById('mainChanges').innerHTML = buildShipChangesHtml(getShipChangesForDate(assignments, date), 'mainChangeCard');
+            } else {
+                head.innerHTML = '';
+                document.getElementById('mainChanges').innerHTML = '';
+            }
+
+            // 필터 칩(개수 포함)
+            const filters = MAIN_FILTERS[isDate ? 'date' : 'all'];
+            if (!filters.some(([k]) => k === mainFilter)) mainFilter = 'all';
+            document.getElementById('mainFilterChips').innerHTML = filters.map(([k, label]) => {
+                const n = rows.filter(r => mainRowPasses(r, k)).length;
+                const alert = ['changed', 'noaddr', 'unpaid', 'none'].includes(k) && n > 0;
+                return `<button type="button" class="main-chip ${mainFilter === k ? 'active' : ''} ${alert ? 'alert' : ''}" data-main-action="filter" data-filter="${k}">${label} ${n}</button>`;
+            }).join('');
+
+            // 작업 버튼
+            document.getElementById('mainActions').innerHTML = isDate
+                ? `${rows.some(r => r.type === '택배') ? '<button type="button" class="btn btn-primary ship-btn-sm" data-ship-action="courier-excel">택배 접수 엑셀</button>' : ''}
+                   <button type="button" class="btn btn-secondary ship-btn-sm" data-ship-action="print">명단 인쇄</button>
+                   <button type="button" class="btn btn-success ship-btn-sm" data-ship-action="excel">명단 엑셀</button>`
+                : `<button type="button" class="btn btn-primary ship-btn-sm" onclick="openAddStudentModal()">+ 학생 추가</button>
+                   <button type="button" class="btn btn-success ship-btn-sm" onclick="downloadExcel()">전체 엑셀</button>`;
+
+            // 표
+            const shown = rows.filter(r => mainRowPasses(r, mainFilter));
+            const heads = isDate
+                ? ['#', '이름', '학년/반', '이번 과목', '수령', '배송지 / 픽업', '입금', '포장', '발송·수령', '영어 오답']
+                : ['#', '이름', '학년/반', '신청 과목', '기본 수령', '기본 배송지', '입금', '택배비', '배부 회차', '영어 오답'];
+            document.getElementById('mainHead').innerHTML = `<tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr>`;
+            document.getElementById('mainBody').innerHTML = shown.length === 0
+                ? `<tr><td colspan="${heads.length}" style="text-align:center; color:#999; padding:24px;">${students.length === 0 ? '학생이 없습니다. [학생 등록·관리]에서 엑셀로 올리거나 + 학생 추가를 누르세요.' : '조건에 맞는 학생이 없습니다.'}</td></tr>`
+                : shown.map((r, i) => isDate ? mainDateRowHtml(r, i + 1) : mainAllRowHtml(r, i + 1)).join('');
+
+            // 아래: 예약대기 · 회차 관리 · 수령 기록
+            document.getElementById('mainWaitlistCount').textContent = `${waitlist.length}명`;
+            document.getElementById('mainWaitlist').innerHTML = buildMainWaitlistHtml();
+            document.getElementById('mainBatchCount').textContent = `(${getBatchList().length}개)`;
+            document.getElementById('mainBatchList').innerHTML = buildBatchListHtml(assignments);
+            const history = computeShipHistory(assignments);
+            document.getElementById('mainHistorySummary').textContent =
+                `택배 ${history.delivery.dates.size}번 · ${history.delivery.boxes.size}건 / 픽업 ${history.pickup.dates.size}번 · ${history.pickup.boxes.size}건`;
+            renderShipHistory(history, 'mainHistory');
+            updateShipTabBadge();
+            if (drawerStudentId) renderDrawer();
+        }
+
+        function mainToggleHtml(attrs, checked) {
+            return `<div class="status-toggle ${checked ? 'checked' : ''}" ${attrs}>${checked ? '✓' : ''}</div>`;
+        }
+
+        function mainWaCell(student) {
+            if (!isEnglishStudent(student)) return '<span class="ship-memo">-</span>';
+            const wa = peekWrongAnswer(student.id);
+            return `<span class="wa-mini" data-main-action="open-wa" data-student-id="${encodeURIComponent(student.id)}">${wa.items.length ? `${wa.items.length}개` : '없음'}${wa.checked ? ' ✓' : ''}</span>`;
+        }
+
+        function mainNameCell(student, extra = '') {
+            return `<span class="main-name" data-main-action="open" data-student-id="${encodeURIComponent(student.id)}">${escapeShipHtml(student.name)}</span>${extra ? '<br>' + extra : ''}`;
+        }
+
+        function mainDateRowHtml(row, idx) {
+            const { student, type, items } = row;
+            const sid = encodeURIComponent(student.id);
+            const batchIds = escapeShipHtml(items.map(a => a.batch.id).join(','));
+            const allPacked = items.every(a => a.status.packed), allDone = items.every(a => a.status.done);
+            const changed = items.some(a => a.overridden || a.status.warning);
+            const badges = items.map(a => (a.overridden ? getShipChangeLabel(a) : '') + getShipWarningHtml(a)).join('');
+            const subj = items.map(a => `<span class="bchip">${escapeShipHtml(a.batch.name)} ${escapeShipHtml(a.subjects.map(shortSubject).join('·'))}</span>`).join('');
+            const typeCls = type === '택배' ? 'delivery' : type === '픽업' ? 'pickup' : 'none';
+            const shipToggle = f => mainToggleHtml(`data-ship-action="toggle" data-field="${f}" data-batch-ids="${batchIds}" data-student-id="${sid}"`, f === 'packed' ? allPacked : allDone);
+            let place = '<span class="ship-memo">-</span>';
+            if (type === '택배') {
+                place = `<span class="ship-addr ${hasShipAddress(student, items) ? '' : 'missing'}" data-ship-action="address" data-batch-ids="${batchIds}" data-student-id="${sid}">${items.some(a => a.status.addr) ? '<b>[이번 회차]</b> ' : ''}${escapeShipHtml(getShipAddressShort(student, items))}</span>`;
+            } else if (type === '픽업') {
+                const when = [student.pickupTime, student.pickupNote].filter(Boolean).join(' · ');
+                place = `<span class="ship-memo" data-main-action="open" data-student-id="${sid}" style="cursor:pointer;">${escapeShipHtml(when || '시간 미정')}</span>`;
+            }
+            return `<tr class="${changed ? 'ship-row-changed' : allDone && type ? 'ship-row-done' : ''}" data-main-row="${sid}">
+                <td>${idx}</td>
+                <td>${mainNameCell(student, badges)}</td>
+                <td class="nowrap">${student.grade}학년 ${escapeShipHtml(student.class)}</td>
+                <td>${subj}</td>
+                <td><button type="button" class="type-badge ${typeCls}" data-ship-action="override" data-student-id="${sid}" title="이번 회차만 변경">${type || '미지정'}</button></td>
+                <td>${place}</td>
+                <td>${mainToggleHtml(`data-toggle-field="paymentConfirmed" data-student-id="${sid}"`, student.paymentConfirmed)}</td>
+                <td>${type === '택배' ? shipToggle('packed') : ''}</td>
+                <td>${type ? shipToggle('done') : ''}</td>
+                <td>${mainWaCell(student)}</td>
+            </tr>`;
+        }
+
+        function mainAllRowHtml(row, idx) {
+            const { student, items } = row;
+            const sid = encodeURIComponent(student.id);
+            const type = student.deliveryType || '';
+            const typeCls = type === '택배' ? 'delivery' : type === '픽업' ? 'pickup' : 'none';
+            const subjects = (student.subjects || []).map(s => `<span class="bchip">${escapeShipHtml(shortSubject(s))}</span>`).join('') || '<span class="ship-memo">과목 없음</span>';
+            const chips = items.map(a => {
+                const cls = a.excluded ? 'excluded' : a.status.done ? 'done' : a.overridden ? 'changed' : '';
+                const t = a.excluded ? '제외' : (a.type || '미지정');
+                return `<span class="bchip ${cls}">${escapeShipHtml(a.batch.name)} ${t}${a.status.done ? ' ✓' : ''}</span>`;
+            }).join('') || '<span class="ship-memo">-</span>';
+            const addr = type === '택배'
+                ? `<span class="ship-addr ${hasShipAddress(student) ? '' : 'missing'}" data-ship-action="address" data-batch-ids="" data-student-id="${sid}">${escapeShipHtml(getShipAddressShort(student))}</span>`
+                : '<span class="ship-memo">-</span>';
+            return `<tr data-main-row="${sid}">
+                <td>${idx}</td>
+                <td>${mainNameCell(student)}</td>
+                <td class="nowrap">${student.grade}학년 ${escapeShipHtml(student.class)}</td>
+                <td>${subjects}</td>
+                <td><span class="type-badge ${typeCls}" data-student-id="${sid}" onclick="cycleDeliveryType(this)" title="클릭: 기본 수령 방식 바꾸기(모든 회차)">${type || '미지정'}</span></td>
+                <td>${addr}</td>
+                <td>${mainToggleHtml(`data-toggle-field="paymentConfirmed" data-student-id="${sid}"`, student.paymentConfirmed)}</td>
+                <td>${type === '택배' ? mainToggleHtml(`data-toggle-field="shippingFeePaid" data-student-id="${sid}"`, student.shippingFeePaid) : ''}</td>
+                <td>${chips}</td>
+                <td>${mainWaCell(student)}</td>
+            </tr>`;
+        }
+
+        function buildMainWaitlistHtml() {
+            const list = [...waitlist].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            const rows = list.map(e => `<tr>
+                <td class="student-name">${escapeShipHtml(e.name || '-')}</td>
+                <td class="nowrap">${e.grade || '-'}학년 ${escapeShipHtml(e.class || '')}</td>
+                <td>${(e.subjects || []).map(s => `<span class="bchip">${escapeShipHtml(shortSubject(s))}</span>`).join('')}</td>
+                <td>${escapeShipHtml(e.deliveryType || '-')}</td>
+                <td class="ship-memo">${escapeShipHtml(e.waitlistNote || '')}</td>
+                <td><div class="inline-actions">
+                    <button type="button" class="btn btn-secondary ship-btn-sm" onclick="openWaitlistModal(${toInlineArg(e.id)})">수정</button>
+                    <button type="button" class="btn btn-success ship-btn-sm" onclick="promoteWaitlistEntry(${toInlineArg(e.id)})">확정</button>
+                    <button type="button" class="btn btn-danger ship-btn-sm" onclick="deleteWaitlistEntry(${toInlineArg(e.id)})">삭제</button>
+                </div></td></tr>`).join('');
+            return `<div style="margin-bottom:6px;"><button type="button" class="btn btn-primary ship-btn-sm" onclick="openWaitlistModal()">+ 예약대기 추가</button></div>`
+                + (rows ? `<div class="table-wrapper"><table class="main-table"><tbody>${rows}</tbody></table></div>` : '<p class="info-note">예약대기 학생이 없습니다.</p>');
+        }
+
+        // ---------- 학생 상세 패널 ----------
+        function openStudentDrawer(studentId, focus) {
+            drawerStudentId = studentId;
+            renderDrawer();
+            const drawer = document.getElementById('studentDrawer');
+            drawer.classList.add('open');
+            drawer.setAttribute('aria-hidden', 'false');
+            if (focus) {
+                const el = document.getElementById(`drawer-${focus}`);
+                if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 50);
+            }
+        }
+
+        function closeStudentDrawer() {
+            drawerStudentId = null;
+            const drawer = document.getElementById('studentDrawer');
+            drawer.classList.remove('open');
+            drawer.setAttribute('aria-hidden', 'true');
+        }
+
+        function drawerField(field, value, type = 'text', placeholder = '') {
+            return `<input type="${type}" data-drawer-field="${field}" value="${escapeShipHtml(value ?? '')}" placeholder="${escapeShipHtml(placeholder)}">`;
+        }
+
+        function drawerToggle(field, label, on) {
+            return `<button type="button" class="toggle-pill ${on ? 'on' : ''}" data-main-action="toggle-field" data-field="${field}">${on ? '✓ ' : ''}${label}</button>`;
+        }
+
+        function renderDrawer() {
+            const student = getStudentById(drawerStudentId);
+            if (!student) { closeStudentDrawer(); return; }
+            // 입력 중이던 칸의 포커스를 다시 그린 뒤에도 유지
+            const active = document.activeElement && document.activeElement.closest && document.activeElement.closest('#studentDrawer [data-drawer-field]');
+            const activeField = active ? active.dataset.drawerField : null;
+
+            const sid = encodeURIComponent(student.id);
+            document.getElementById('drawerTitle').innerHTML =
+                `<div class="drawer-name">${escapeShipHtml(student.name)}</div><div class="drawer-sub">${student.grade}학년 ${escapeShipHtml(student.class)}${student.accessCode ? ` · 학부모 코드 ${escapeShipHtml(student.accessCode)}` : ''}</div>`;
+
+            const assignments = buildShipAssignments().filter(a => a.student.id === student.id);
+            const base = getShipAddress(student);
+            const batchHtml = assignments.map(a => {
+                const current = mainMode === 'date' && isBatchOnDate(a.batch, selectedShipDate);
+                const typeCls = a.excluded ? 'none' : a.type === '택배' ? 'delivery' : a.type === '픽업' ? 'pickup' : 'none';
+                const when = a.excluded ? '' : a.date ? formatShipDate(a.date) : '날짜 미정';
+                const st = a.status;
+                const toggles = a.excluded || !a.type ? '' : (a.type === '택배' ? `<button type="button" class="toggle-pill ${st.packed ? 'on' : ''}" data-ship-action="toggle" data-field="packed" data-batch-ids="${escapeShipHtml(a.batch.id)}" data-student-id="${sid}">${st.packed ? '✓ ' : ''}포장</button>` : '')
+                    + `<button type="button" class="toggle-pill ${st.done ? 'on' : ''}" data-ship-action="toggle" data-field="done" data-batch-ids="${escapeShipHtml(a.batch.id)}" data-student-id="${sid}">${st.done ? '✓ ' : ''}${a.type === '택배' ? '발송' : '수령'} 완료</button>`;
+                return `<div class="drawer-batch ${current ? 'current' : ''}">
+                    <strong>${escapeShipHtml(a.batch.name)}</strong> <span class="ship-memo">${escapeShipHtml(a.subjects.map(shortSubject).join('·'))}</span>
+                    <span class="type-badge ${typeCls}">${a.excluded ? '제외' : (a.type || '미지정')}</span> <span class="ship-memo">${when}</span>
+                    ${a.overridden ? getShipChangeLabel(a) : ''}${getShipWarningHtml(a)}
+                    ${st.addr ? `<div class="ship-memo">이번 회차 배송지: ${escapeShipHtml(`${st.addr.addr || ''} ${st.addr.addr2 || ''}`)}</div>` : ''}
+                    <div class="row">
+                        ${toggles}
+                        <button type="button" class="btn btn-warning ship-btn-sm" data-ship-action="override" data-student-id="${sid}">이번 회차만 변경</button>
+                        ${a.type === '택배' && !a.excluded ? `<button type="button" class="btn btn-secondary ship-btn-sm" data-ship-action="address" data-batch-ids="${escapeShipHtml(a.batch.id)}" data-student-id="${sid}">이번 회차 주소</button>` : ''}
+                        ${st.warning ? `<button type="button" class="btn btn-warning ship-btn-sm" data-ship-action="resolve" data-batch-id="${escapeShipHtml(a.batch.id)}" data-student-id="${sid}">재확인 완료</button>` : ''}
+                    </div>
+                </div>`;
+            }).join('') || '<p class="info-note">이 학생의 과목이 들어간 배부 회차가 없습니다.</p>';
+
+            const hasPickup = student.deliveryType === '픽업' || assignments.some(a => a.type === '픽업' && !a.excluded);
+            const week = getMainWeek();
+            const wa = peekWrongAnswer(student.id, week);
+            const records = assignments.filter(a => a.status.done && a.date).sort((x, y) => x.date.localeCompare(y.date));
+
+            document.getElementById('drawerBody').innerHTML = `
+                <div class="drawer-section">
+                    <h4>연락처</h4>
+                    <div class="drawer-grid">
+                        <label>학생</label>${drawerField('phone', student.phone, 'tel', '010-0000-0000')}
+                        <label>학부모</label>${drawerField('parentPhones', getStudentParentPhones(student).join(', '), 'tel', '여러 개는 쉼표로')}
+                    </div>
+                </div>
+                <div class="drawer-section">
+                    <h4>신청 과목 <button type="button" class="btn btn-secondary ship-btn-sm" data-main-action="subjects">과목 편집</button></h4>
+                    <div>${(student.subjects || []).map(s => `<span class="bchip">${escapeShipHtml(s)}</span>`).join('') || '<span class="ship-memo">과목 없음</span>'}</div>
+                </div>
+                <div class="drawer-section" id="drawer-ship">
+                    <h4>수령 · 배송</h4>
+                    <div class="drawer-grid" style="margin-bottom:8px;">
+                        <label>기본 수령</label>
+                        <select data-drawer-field="deliveryType">
+                            ${['', '택배', '픽업'].map(v => `<option value="${v}" ${(student.deliveryType || '') === v ? 'selected' : ''}>${v || '미지정'}</option>`).join('')}
+                        </select>
+                        <label>기본 배송지</label>
+                        <span><span class="ship-addr ${hasShipAddress(student) ? '' : 'missing'}" data-ship-action="address" data-batch-ids="" data-student-id="${sid}">${escapeShipHtml(base.addr ? `${base.zip || ''} ${base.addr} ${base.addr2 || ''}` : '⚠ 미입력 (클릭하여 입력)')}</span></span>
+                    </div>
+                    ${batchHtml}
+                </div>
+                ${hasPickup ? `<div class="drawer-section">
+                    <h4>픽업 약속</h4>
+                    <div class="drawer-grid">
+                        <label>날짜</label>${drawerField('pickupDate', student.pickupDate, 'date')}
+                        <label>시간</label>${drawerField('pickupTime', student.pickupTime, 'text', '예: 17:30')}
+                        <label>메모</label>${drawerField('pickupNote', student.pickupNote, 'text', '예: 어머니 방문')}
+                    </div>
+                </div>` : ''}
+                <div class="drawer-section">
+                    <h4>입금</h4>
+                    <div class="drawer-grid" style="margin-bottom:8px;">
+                        <label>입금액</label>${drawerField('paymentAmount', student.paymentAmount || '', 'number', '원')}
+                    </div>
+                    <div class="drawer-toggles">
+                        ${drawerToggle('paymentConfirmed', '입금 확인', student.paymentConfirmed)}
+                        ${student.deliveryType === '택배' ? drawerToggle('shippingFeePaid', '택배비', student.shippingFeePaid) : ''}
+                        ${drawerToggle('cashReceipt', '현금영수증', student.cashReceipt)}
+                        ${drawerToggle('mobileUrl', '모바일 URL', student.mobileUrl)}
+                    </div>
+                </div>
+                ${isEnglishStudent(student) ? `<div class="drawer-section" id="drawer-wa">
+                    <h4>영어 오답 <span class="ship-memo">${week} 주</span>
+                        <button type="button" class="toggle-pill ${wa.checked ? 'on' : ''}" data-main-action="wa-check">${wa.checked ? '✓ ' : ''}배부 완료</button></h4>
+                    <div>${wa.items.map((item, i) => `<span class="wa-chip">${escapeShipHtml(item)}<button type="button" data-main-action="wa-remove" data-idx="${i}" title="삭제">×</button></span>`).join('') || '<span class="ship-memo">이번 주 오답 없음</span>'}</div>
+                    <div style="display:flex; gap:6px; margin-top:6px;">
+                        <input type="text" id="drawerWaInput" placeholder="오답 문제 입력 후 Enter" style="flex:1;">
+                        <button type="button" class="btn btn-primary ship-btn-sm" data-main-action="wa-add">추가</button>
+                    </div>
+                </div>` : ''}
+                <div class="drawer-section">
+                    <h4>받은 기록</h4>
+                    ${records.map(a => `<div class="ship-memo">${formatShipDate(a.date)} ${escapeShipHtml(a.type)} · ${escapeShipHtml(a.batch.name)} ${escapeShipHtml(a.subjects.map(shortSubject).join('·'))}</div>`).join('') || '<span class="ship-memo">아직 없음</span>'}
+                </div>`;
+
+            if (activeField) {
+                const el = document.querySelector(`#studentDrawer [data-drawer-field="${activeField}"]`);
+                if (el) el.focus();
+            }
+        }
+
+        function addDrawerWrongAnswer() {
+            const input = document.getElementById('drawerWaInput');
+            const text = input ? input.value.trim() : '';
+            if (!text || !drawerStudentId) return;
+            getWrongAnswerEntry(WA_SUBJECT, getMainWeek(), drawerStudentId).items.push(text);
+            saveWrongAnswerData();
+            showSaveIndicator();
+            scheduleMainRender();
+            setTimeout(() => { const el = document.getElementById('drawerWaInput'); if (el) el.focus(); }, 30);
+        }
+
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('[data-main-action]');
+            if (!target) return;
+            const action = target.dataset.mainAction;
+            const studentId = decodeURIComponent(target.dataset.studentId || '') || drawerStudentId;
+            if (action === 'all') {
+                mainMode = 'all';
+                mainModeAuto = false;
+                renderMain();
+            } else if (action === 'date') {
+                mainMode = 'date';
+                mainModeAuto = false;
+                selectedShipDate = target.dataset.date;
+                renderShipments();
+                renderMain();
+            } else if (action === 'filter') {
+                mainFilter = target.dataset.filter;
+                renderMain();
+            } else if (action === 'open') {
+                openStudentDrawer(studentId);
+            } else if (action === 'open-wa') {
+                openStudentDrawer(studentId, 'wa');
+            } else if (action === 'subjects') {
+                openSubjectPicker(drawerStudentId);
+            } else if (action === 'toggle-field') {
+                const student = getStudentById(drawerStudentId);
+                if (!student) return;
+                student[target.dataset.field] = !student[target.dataset.field];
+                saveStudentsData();
+                showSaveIndicator();
+            } else if (action === 'wa-add') {
+                addDrawerWrongAnswer();
+            } else if (action === 'wa-remove') {
+                const entry = getWrongAnswerEntry(WA_SUBJECT, getMainWeek(), drawerStudentId);
+                const i = parseInt(target.dataset.idx, 10);
+                if (i >= 0 && i < entry.items.length && confirm(`"${entry.items[i]}" 항목을 삭제할까요?`)) {
+                    entry.items.splice(i, 1);
+                    saveWrongAnswerData();
+                    showSaveIndicator();
+                }
+            } else if (action === 'wa-check') {
+                const entry = getWrongAnswerEntry(WA_SUBJECT, getMainWeek(), drawerStudentId);
+                entry.checked = !entry.checked;
+                saveWrongAnswerData();
+                showSaveIndicator();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target && e.target.id === 'drawerWaInput') {
+                e.preventDefault();
+                addDrawerWrongAnswer();
+            } else if (e.key === 'Escape' && drawerStudentId && !document.querySelector('.modal[style*="block"]')) {
+                closeStudentDrawer();
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            const el = e.target.closest && e.target.closest('#studentDrawer [data-drawer-field]');
+            if (!el) return;
+            const student = getStudentById(drawerStudentId);
+            if (!student) return;
+            const field = el.dataset.drawerField;
+            const value = el.value.trim();
+            if (field === 'phone') {
+                student.phone = normalizePhone(value) || '';
+            } else if (field === 'parentPhones') {
+                const parsed = parseParentPhones(value);
+                student.parentPhones = parsed.phones;
+                student.parentPhoneKeys = parsed.keys;
+                student.parentPhone = parsed.phones[0] || '';
+            } else if (field === 'paymentAmount') {
+                student.paymentAmount = parseInt(value.replace(/[^0-9]/g, ''), 10) || 0;
+            } else if (field === 'deliveryType') {
+                if (student.deliveryType && Object.keys(shipmentData.batches).length > 0
+                    && !confirm(`기본 수령 방식을 '${student.deliveryType}' → '${value || '미지정'}'(으)로 바꿉니다. 앞으로 모든 배부 회차에 적용됩니다.\n\n한 번만 바꾸는 거라면 취소하고 '이번 회차만 변경'을 누르세요.`)) {
+                    el.value = student.deliveryType;
+                    return;
+                }
+                student.deliveryType = value;
+                flagShipRepackForBaseChange(student.id);
+            } else if (['pickupDate', 'pickupTime', 'pickupNote'].includes(field)) {
+                student[field] = value;
+            } else {
+                return;
+            }
+            saveStudentsData();
+            showSaveIndicator();
+        });
+
         // ==================== 탭 7: 영어 오답 배부 ====================
 
         function saveWrongAnswerData() {
+            scheduleMainRender();
             if (!sessionExists()) return;
             if (useFirebase && database) {
                 getSessionRef('wrongAnswerData').set(sanitizeForFirebase(wrongAnswerData))
@@ -8647,7 +9636,7 @@
         function loadWrongAnswerData() {
             if (!sessionExists()) {
                 wrongAnswerData = {};
-                if (currentTab === 7) renderTab7();
+                if (currentTab === 7) renderTab7(); scheduleMainRender();
                 return;
             }
             wrongAnswerData = {};
@@ -8657,16 +9646,16 @@
                     if (savedData) {
                         wrongAnswerData = savedData;
                     }
-                    if (currentTab === 7) renderTab7();
+                    if (currentTab === 7) renderTab7(); scheduleMainRender();
                 }).catch(() => {
                     const saved = localStorage.getItem(getCurrentSessionStorageKey('wrongAnswerData'));
                     if (saved) { try { wrongAnswerData = JSON.parse(saved); } catch(e) { console.error('wrongAnswerData JSON 파싱 실패:', e); } }
-                    if (currentTab === 7) renderTab7();
+                    if (currentTab === 7) renderTab7(); scheduleMainRender();
                 });
             } else {
                 const saved = localStorage.getItem(getCurrentSessionStorageKey('wrongAnswerData'));
                 if (saved) { try { wrongAnswerData = JSON.parse(saved); } catch(e) { console.error('wrongAnswerData JSON 파싱 실패:', e); } }
-                if (currentTab === 7) renderTab7();
+                if (currentTab === 7) renderTab7(); scheduleMainRender();
             }
         }
 

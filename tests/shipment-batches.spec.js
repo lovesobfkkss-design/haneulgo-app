@@ -45,7 +45,7 @@ test.describe('Shipment Batches', () => {
     page.on('dialog', dialog => dialog.accept());
     await page.goto('file://' + __dirname + '/../index.html');
     await expect(page.locator('#grade1Body tr')).toHaveCount(3);
-    await page.locator('.tab-btn:has-text("택배/픽업")').click();
+    await page.evaluate(() => switchTab(5));
   });
 
   test('only students with batch subjects appear, split by delivery and pickup date', async ({ page }) => {
@@ -128,7 +128,7 @@ test.describe('Shipment Batches', () => {
     expect(checks[week]['sid_a']).toEqual({ '국어': true, '영어': true });
 
     await page.reload();
-    await page.locator('.tab-btn:has-text("택배/픽업")').click();
+    await page.evaluate(() => switchTab(5));
     await expect(page.locator('#shipSummary')).toContainText('택배 발송 1번 · 2건');
   });
 });
@@ -151,7 +151,7 @@ test.describe('Courier Excel', () => {
     page.on('dialog', dialog => dialog.accept());
     await page.goto('file://' + __dirname + '/../index.html');
     await expect(page.locator('#grade1Body tr')).toHaveCount(3);
-    await page.locator('.tab-btn:has-text("택배/픽업")').click();
+    await page.evaluate(() => switchTab(5));
   });
 
   test('address entry and courier excel follow the delivery list', async ({ page }) => {
@@ -197,7 +197,7 @@ test.describe('Per-batch address', () => {
     page.on('dialog', dialog => dialog.accept());
     await page.goto('file://' + __dirname + '/../index.html');
     await expect(page.locator('#grade1Body tr')).toHaveCount(3);
-    await page.locator('.tab-btn:has-text("택배/픽업")').click();
+    await page.evaluate(() => switchTab(5));
   });
 
   test('this-week-only address keeps the base address and flags re-export', async ({ page }) => {

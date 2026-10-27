@@ -19,6 +19,7 @@ test.describe('Check Persistence', () => {
       ]));
     });
     await page.goto('file://' + __dirname + '/../index.html');
+    await page.evaluate(() => switchTab(1));
     await expect(page.locator('#grade1Body tr')).toHaveCount(1);
   });
 
@@ -31,6 +32,7 @@ test.describe('Check Persistence', () => {
     expect(saved[week]['sid_test-1']['1학년 국어']).toBe(true);
 
     await page.reload();
+    await page.evaluate(() => switchTab(1));
     await expect(page.locator('#grade1Body tr')).toHaveCount(1);
     await expect(page.locator('#grade1Body input[type=checkbox]').first()).toBeChecked();
     await expect(page.locator('#grade1Body input[type=checkbox]').nth(1)).not.toBeChecked();

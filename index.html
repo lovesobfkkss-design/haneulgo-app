@@ -5414,7 +5414,7 @@
 
         function updateSubjectOverviewVisibility() {
             const el = document.getElementById('subjectOverview');
-            if (el) el.style.display = isAdmin && currentTab === 1 ? '' : 'none';
+            if (el) el.style.display = isAdmin && (currentTab === 8 || currentTab === 1) ? '' : 'none';
         }
 
         function cycleDeliveryType(el) {

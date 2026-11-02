@@ -4025,6 +4025,7 @@
                 students.push(...migratedStudents);
                 ensureNewFields();
                 normalizeStudentPhones();
+                unifySubjectSpellings();
                 ensureStudentIds();
                 removeDuplicateStudents();
                 waitlist.length = 0;
@@ -4914,6 +4915,48 @@
             });
         }
 
+        // 띄어쓰기만 다른 과목명(예: '역학과에너지' / '역학과 에너지')을 같은 과목으로 취급
+        function subjectKey(name) {
+            return String(name || '').replace(/\s+/g, '');
+        }
+
+        // 기존 학생 데이터에 이미 있는 표기를 우선 사용
+        function canonicalSubject(name) {
+            const trimmed = String(name || '').trim();
+            const key = subjectKey(trimmed);
+            for (const s of students) {
+                const found = (s.subjects || []).find(subj => subjectKey(subj) === key);
+                if (found) return found;
+            }
+            return trimmed;
+        }
+
+        // 띄어쓰기 변형을 가장 많이 쓰인 표기로 통일 (동수면 띄어쓴 표기)
+        function unifySubjectSpellings() {
+            const spellingCounts = new Map();
+            students.forEach(s => (s.subjects || []).forEach(subj => {
+                const key = subjectKey(subj);
+                if (!spellingCounts.has(key)) spellingCounts.set(key, new Map());
+                const m = spellingCounts.get(key);
+                m.set(subj, (m.get(subj) || 0) + 1);
+            }));
+            const preferred = new Map();
+            spellingCounts.forEach((m, key) => {
+                const best = [...m.entries()].sort((a, b) => b[1] - a[1] || b[0].length - a[0].length)[0][0];
+                preferred.set(key, best);
+            });
+            let changed = false;
+            students.forEach(s => {
+                if (!Array.isArray(s.subjects)) return;
+                const unified = [...new Set(s.subjects.map(subj => preferred.get(subjectKey(subj)) || subj))];
+                if (unified.length !== s.subjects.length || unified.some((v, i) => v !== s.subjects[i])) {
+                    s.subjects = unified;
+                    changed = true;
+                }
+            });
+            return changed;
+        }
+
         function normalizeDeliveryType(value) {
             if (!value) return '';
             const text = String(value).trim();
@@ -5350,7 +5393,7 @@
             });
         }
 
-        const SUBJECT_CAPACITY = 25;
+        const SUBJECT_CAPACITY = 30;
         let currentOverviewFilter = 'all';
 
         function updateSubjectOverview() {
@@ -5694,8 +5737,9 @@
                 return;
             }
             const student = getStudentById(studentId);
-            if (student && !student.subjects.includes(subjectName.trim())) {
-                student.subjects.push(subjectName.trim());
+            const canonicalName = canonicalSubject(subjectName);
+            if (student && !student.subjects.includes(canonicalName)) {
+                student.subjects.push(canonicalName);
                 saveStudentsData();
             }
             editingStudent = null;
@@ -6750,7 +6794,7 @@
             input.onkeydown = (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const value = input.value.trim();
+                    const value = canonicalSubject(input.value);
                     const student = getStudentById(studentId);
                     if (student && value && !student.subjects.includes(value)) {
                         student.subjects.push(value);
@@ -6762,7 +6806,7 @@
             };
             input.onblur = () => {
                 setTimeout(() => {
-                    const value = input.value.trim();
+                    const value = canonicalSubject(input.value);
                     const student = getStudentById(studentId);
                     if (student && value && !student.subjects.includes(value)) {
                         student.subjects.push(value);
@@ -7308,6 +7352,7 @@
                         students.push(...normalizedStudents);
                         const fieldsChanged = ensureNewFields();
                         normalizeStudentPhones();
+                        unifySubjectSpellings();
                         const changed = ensureStudentIds();
                         const deduped = removeDuplicateStudents();
 
@@ -7344,6 +7389,7 @@
             students.push(...savedData);
             const fieldsChanged = ensureNewFields();
             normalizeStudentPhones();
+            unifySubjectSpellings();
             const changed = ensureStudentIds();
             const deduped = removeDuplicateStudents();
 
@@ -7365,6 +7411,7 @@
             students.push(...JSON.parse(JSON.stringify(defaultStudents)));
             ensureNewFields();
             normalizeStudentPhones();
+            unifySubjectSpellings();
             ensureStudentIds();
             waitlist.length = 0;
 
@@ -8170,7 +8217,8 @@
             const list = [];
             getBatchList().forEach(batch => {
                 students.forEach(student => {
-                    const subjects = (student.subjects || []).filter(subj => batch.subjects.includes(subj));
+                    const batchKeys = new Set(batch.subjects.map(subjectKey));
+                    const subjects = (student.subjects || []).filter(subj => batchKeys.has(subjectKey(subj)));
                     if (subjects.length === 0) return;
                     const status = getShipStatus(batch.id, student.id) || {};
                     const base = student.deliveryType || '';
@@ -8587,9 +8635,13 @@
             document.getElementById('batchPickupDateInput').value = batch ? batch.pickupDate : '';
             document.getElementById('batchMemoInput').value = batch ? batch.memo : '';
             document.getElementById('batchDeleteBtn').style.display = batch ? '' : 'none';
-            const selected = new Set(batch ? batch.subjects : []);
             const subjects = getAllStudentSubjects();
-            selected.forEach(subj => { if (!subjects.some(([name]) => name === subj)) subjects.push([subj, 0]); });
+            const selected = new Set();
+            (batch ? batch.subjects : []).forEach(subj => {
+                const match = subjects.find(([name]) => subjectKey(name) === subjectKey(subj));
+                if (match) selected.add(match[0]);
+                else { selected.add(subj); subjects.push([subj, 0]); }
+            });
             document.getElementById('batchSubjectList').innerHTML = subjects.length === 0
                 ? '<span class="info-note">등록된 학생 과목이 없습니다.</span>'
                 : subjects.map(([subj, count]) =>

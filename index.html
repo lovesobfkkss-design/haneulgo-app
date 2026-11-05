@@ -2457,6 +2457,7 @@
                     <button class="btn btn-secondary" onclick="uncheckAll()">전체 해제</button>
                     <button class="btn btn-primary" onclick="toggleEditMode(event)">과목 편집</button>
                     <button class="btn btn-success" onclick="downloadExcel()">엑셀 다운로드</button>
+                    <button class="btn btn-primary" onclick="openCourierExportModal(true)">택배 업로드 엑셀</button>
                     <button class="btn btn-success" onclick="openBulkSMSModal()">전체 문자 보내기</button>
                 </div>
             </div>
@@ -3466,7 +3467,7 @@
                     <label for="courierUnitPrice">제품단가 (1만원 단위, 예: 1 = 1만원)</label>
                     <input type="number" id="courierUnitPrice" min="1" step="1">
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="courierSkipDoneGroup">
                     <label style="display:flex; align-items:center; gap:6px; font-weight:400;">
                         <input type="checkbox" id="courierSkipDone" style="width:auto;"> 발송 완료 체크된 학생은 빼기
                     </label>
@@ -7852,7 +7853,7 @@
 
         // ==================== 엑셀 다운로드 ====================
         function downloadExcel() {
-            const headers = ['학년', '번호', '이름', '반', '신청 과목', '수령', '입금액', '택배비 납부', '학생 전화번호', '학부모 전화번호', '접속 코드', '코드 만료일', '현금영수증', '모바일URL', '입금확인', '픽업 날짜', '픽업 시간', '픽업 메모'];
+            const headers = ['학년', '번호', '이름', '반', '신청 과목', '수령', '입금액', '택배비 납부', '학생 전화번호', '학부모 전화번호', '접속 코드', '코드 만료일', '현금영수증', '모바일URL', '입금확인', '픽업 날짜', '픽업 시간', '픽업 메모', '우편번호', '주소', '상세주소', '배송 메모'];
 
             const sortedStudents = getSortedStudents();
 
@@ -7875,7 +7876,8 @@
                     student.paymentConfirmed ? 'O' : 'X',
                     student.pickupDate || '',
                     student.pickupTime || '',
-                    student.pickupNote || ''
+                    student.pickupNote || '',
+                    ...(addr => [addr.zip || '', addr.addr || '', addr.addr2 || '', addr.memo || ''])(student.shipAddress || {})
                 ];
             });
 
@@ -9066,7 +9068,13 @@
             document.head.appendChild(script);
         }
 
+        // true면 날짜·회차와 상관없이 기본 수령 방식이 택배인 학생 전체를 기본 배송지로 내보낸다
+        let courierExportAll = false;
+
         function getCourierRows(skipDone) {
+            if (courierExportAll) {
+                return getSortedStudents().filter(s => s.deliveryType === '택배').map(student => ({ student, items: [] }));
+            }
             const date = selectedShipDate;
             const assignments = buildShipAssignments().filter(a => !a.excluded && a.type === '택배'
                 && (date === SHIP_NO_DATE ? !a.date : a.date === date));
@@ -9082,14 +9090,17 @@
         function updateCourierExportInfo() {
             const rows = getCourierRows(document.getElementById('courierSkipDone').checked);
             const missing = rows.filter(r => !hasShipAddress(r.student, r.items) || !getCourierReceiver(r.student, r.items).phone);
-            document.getElementById('courierExportInfo').textContent =
-                `${formatShipDate(selectedShipDate)} 택배 명단 ${rows.length}명 (이번 회차 변경 반영)을 택배 접수 양식(Sample)으로 만듭니다.`;
+            document.getElementById('courierExportInfo').textContent = courierExportAll
+                ? `수령 방식이 택배인 학생 전체 ${rows.length}명을 로지아이 택배 업로드 양식(Sample)으로 만듭니다. (기본 배송지 사용)`
+                : `${formatShipDate(selectedShipDate)} 택배 명단 ${rows.length}명 (이번 회차 변경 반영)을 택배 접수 양식(Sample)으로 만듭니다.`;
             document.getElementById('courierExportWarn').textContent = missing.length > 0
                 ? `⚠ 배송지(우편번호·주소·상세주소) 또는 전화번호가 없는 ${missing.length}명은 엑셀에서 빠집니다: ${missing.map(r => r.student.name).join(', ')}`
                 : '';
         }
 
-        function openCourierExportModal() {
+        function openCourierExportModal(all = false) {
+            courierExportAll = all === true;
+            document.getElementById('courierSkipDoneGroup').style.display = courierExportAll ? 'none' : '';
             const st = loadCourierSettings();
             document.getElementById('courierBoxType').value = st.box;
             document.getElementById('courierItemName').value = st.item;
@@ -9114,7 +9125,7 @@
             const box = document.getElementById('courierBoxType').value;
             const item = courierSafeText(document.getElementById('courierItemName').value, 10);
             const price = parseInt(document.getElementById('courierUnitPrice').value, 10);
-            const skipDone = document.getElementById('courierSkipDone').checked;
+            const skipDone = !courierExportAll && document.getElementById('courierSkipDone').checked;
             if (!item) {
                 alert('물품명을 입력해주세요.');
                 return;
@@ -9123,7 +9134,7 @@
                 alert('제품단가는 1 이상(1만원 단위)으로 입력해주세요.');
                 return;
             }
-            try { localStorage.setItem(COURIER_SETTINGS_KEY, JSON.stringify({ box, item, price, skipDone })); } catch (e) { /* 저장 안 돼도 다운로드는 진행 */ }
+            try { localStorage.setItem(COURIER_SETTINGS_KEY, JSON.stringify({ box, item, price, skipDone: document.getElementById('courierSkipDone').checked })); } catch (e) { /* 저장 안 돼도 다운로드는 진행 */ }
 
             const rows = getCourierRows(skipDone).filter(r => hasShipAddress(r.student, r.items) && getCourierReceiver(r.student, r.items).phone);
             if (rows.length === 0) {
@@ -9159,6 +9170,13 @@
             }
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'sample');
+            if (courierExportAll) {
+                const now = new Date();
+                const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+                XLSX.writeFile(wb, `로지아이_택배업로드_전체_${ymd}_${rows.length}명.xlsx`);
+                closeCourierExportModal();
+                return;
+            }
             const label = selectedShipDate === SHIP_NO_DATE ? '날짜미정' : selectedShipDate;
             XLSX.writeFile(wb, `택배접수_${label}_${rows.length}명.xlsx`);
             // 접수한 시점을 남겨 두고, 이후 주소·수령 방식이 바뀌면 '택배 접수 다시' 경고를 띄운다
@@ -9322,7 +9340,8 @@
                    <button type="button" class="btn btn-secondary ship-btn-sm" data-ship-action="print">명단 인쇄</button>
                    <button type="button" class="btn btn-success ship-btn-sm" data-ship-action="excel">명단 엑셀</button>`
                 : `<button type="button" class="btn btn-primary ship-btn-sm" onclick="openAddStudentModal()">+ 학생 추가</button>
-                   <button type="button" class="btn btn-success ship-btn-sm" onclick="downloadExcel()">전체 엑셀</button>`;
+                   <button type="button" class="btn btn-success ship-btn-sm" onclick="downloadExcel()">전체 엑셀</button>
+                   <button type="button" class="btn btn-primary ship-btn-sm" onclick="openCourierExportModal(true)">택배 업로드 엑셀</button>`;
 
             // 표
             const shown = rows.filter(r => mainRowPasses(r, mainFilter));

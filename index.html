@@ -9173,12 +9173,12 @@
             if (courierExportAll) {
                 const now = new Date();
                 const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-                XLSX.writeFile(wb, `로지아이_택배업로드_전체_${ymd}_${rows.length}명.xlsx`);
+                XLSX.writeFile(wb, `로지아이_택배업로드_전체_${ymd}_${rows.length}명.xlsx`, { bookSST: true });
                 closeCourierExportModal();
                 return;
             }
             const label = selectedShipDate === SHIP_NO_DATE ? '날짜미정' : selectedShipDate;
-            XLSX.writeFile(wb, `택배접수_${label}_${rows.length}명.xlsx`);
+            XLSX.writeFile(wb, `택배접수_${label}_${rows.length}명.xlsx`, { bookSST: true });
             // 접수한 시점을 남겨 두고, 이후 주소·수령 방식이 바뀌면 '택배 접수 다시' 경고를 띄운다
             const now = new Date().toISOString();
             rows.forEach(row => row.items.forEach(a => {

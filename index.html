@@ -4932,8 +4932,41 @@
             return trimmed;
         }
 
+        // 학년 없이 입력된 과목('영어')은 학생 학년을 붙여 '1학년 영어'와 같은 과목으로 센다.
+        // 다른 학생이 학년을 붙여 쓰는 과목만 바꾼다 (선택과목 '세포와 물질대사' 등은 그대로).
+        function getGradedSubjectNames() {
+            const names = new Set();
+            students.forEach(s => (s.subjects || []).forEach(subj => {
+                const m = String(subj).match(/^\d학년\s*(.+)$/);
+                if (m) names.add(subjectKey(m[1]));
+            }));
+            return names;
+        }
+
+        function withGradePrefix(grade, subject, gradedNames = getGradedSubjectNames()) {
+            const trimmed = String(subject || '').trim();
+            if (!trimmed || /^\d학년/.test(trimmed) || ![1, 2, 3].includes(Number(grade))) return trimmed;
+            if (!gradedNames.has(subjectKey(trimmed))) return trimmed;
+            return `${Number(grade)}학년 ${trimmed}`;
+        }
+
+        function addGradeToSubjects() {
+            let changed = false;
+            const gradedNames = getGradedSubjectNames();
+            students.forEach(s => {
+                if (!Array.isArray(s.subjects)) return;
+                const fixed = [...new Set(s.subjects.map(subj => withGradePrefix(s.grade, subj, gradedNames)))];
+                if (fixed.length !== s.subjects.length || fixed.some((v, i) => v !== s.subjects[i])) {
+                    s.subjects = fixed;
+                    changed = true;
+                }
+            });
+            return changed;
+        }
+
         // 띄어쓰기 변형을 가장 많이 쓰인 표기로 통일 (동수면 띄어쓴 표기)
         function unifySubjectSpellings() {
+            let changed = addGradeToSubjects();
             const spellingCounts = new Map();
             students.forEach(s => (s.subjects || []).forEach(subj => {
                 const key = subjectKey(subj);
@@ -4946,7 +4979,6 @@
                 const best = [...m.entries()].sort((a, b) => b[1] - a[1] || b[0].length - a[0].length)[0][0];
                 preferred.set(key, best);
             });
-            let changed = false;
             students.forEach(s => {
                 if (!Array.isArray(s.subjects)) return;
                 const unified = [...new Set(s.subjects.map(subj => preferred.get(subjectKey(subj)) || subj))];
@@ -5738,7 +5770,7 @@
                 return;
             }
             const student = getStudentById(studentId);
-            const canonicalName = canonicalSubject(subjectName);
+            const canonicalName = canonicalSubject(withGradePrefix(student && student.grade, subjectName));
             if (student && !student.subjects.includes(canonicalName)) {
                 student.subjects.push(canonicalName);
                 saveStudentsData();
@@ -6795,8 +6827,8 @@
             input.onkeydown = (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const value = canonicalSubject(input.value);
                     const student = getStudentById(studentId);
+                    const value = canonicalSubject(withGradePrefix(student && student.grade, input.value));
                     if (student && value && !student.subjects.includes(value)) {
                         student.subjects.push(value);
                         saveStudentsData();
@@ -6807,8 +6839,8 @@
             };
             input.onblur = () => {
                 setTimeout(() => {
-                    const value = canonicalSubject(input.value);
                     const student = getStudentById(studentId);
+                    const value = canonicalSubject(withGradePrefix(student && student.grade, input.value));
                     if (student && value && !student.subjects.includes(value)) {
                         student.subjects.push(value);
                         saveStudentsData();
@@ -7298,6 +7330,7 @@
         }
 
         function saveStudentsData() {
+            addGradeToSubjects();
             scheduleMainRender();
             if (useFirebase && database) {
                 const studentsById = buildStudentsById();
@@ -7353,7 +7386,7 @@
                         students.push(...normalizedStudents);
                         const fieldsChanged = ensureNewFields();
                         normalizeStudentPhones();
-                        unifySubjectSpellings();
+                        const subjectsFixed = unifySubjectSpellings();
                         const changed = ensureStudentIds();
                         const deduped = removeDuplicateStudents();
 
@@ -7361,7 +7394,7 @@
                         waitlist.push(...(Array.isArray(waitlistSnapshot.val()) ? waitlistSnapshot.val() : []));
                         const waitlistChanged = normalizeWaitlist();
 
-                        if (fieldsChanged || changed || deduped || savedData === null || waitlistSnapshot.val() === null || waitlistChanged) {
+                        if (fieldsChanged || subjectsFixed || changed || deduped || savedData === null || waitlistSnapshot.val() === null || waitlistChanged) {
                             saveStudentsData();
                         }
                         renderStudents();
@@ -7390,7 +7423,7 @@
             students.push(...savedData);
             const fieldsChanged = ensureNewFields();
             normalizeStudentPhones();
-            unifySubjectSpellings();
+            const subjectsFixed = unifySubjectSpellings();
             const changed = ensureStudentIds();
             const deduped = removeDuplicateStudents();
 
@@ -7400,7 +7433,7 @@
                 try { waitlist.push(...JSON.parse(savedWaitlist)); } catch(e) { console.error('waitlistData JSON 파싱 실패:', e); }
             }
             const waitlistChanged = normalizeWaitlist();
-            if (fieldsChanged || changed || deduped || waitlistChanged) saveStudentsData();
+            if (fieldsChanged || subjectsFixed || changed || deduped || waitlistChanged) saveStudentsData();
         }
 
         function resetToDefaultStudents() {
@@ -8217,9 +8250,11 @@
         // 회차 × 학생 단위 배정 정보 (그 회차 과목을 신청한 학생만)
         function buildShipAssignments() {
             const list = [];
+            const gradedNames = getGradedSubjectNames();
             getBatchList().forEach(batch => {
                 students.forEach(student => {
-                    const batchKeys = new Set(batch.subjects.map(subjectKey));
+                    // 예전에 학년 없이 만든 회차 과목('영어')은 학생 학년 과목으로 맞춘다
+                    const batchKeys = new Set(batch.subjects.map(subj => subjectKey(withGradePrefix(student.grade, subj, gradedNames))));
                     const subjects = (student.subjects || []).filter(subj => batchKeys.has(subjectKey(subj)));
                     if (subjects.length === 0) return;
                     const status = getShipStatus(batch.id, student.id) || {};
